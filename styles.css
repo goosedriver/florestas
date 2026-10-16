@@ -2160,6 +2160,8 @@ a.btn-sm {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  width: max-content;
+  max-width: 170px;
   background: rgba(13, 30, 23, 0.94);
   backdrop-filter: blur(6px);
   border: 1.5px solid #52b788;
@@ -2168,7 +2170,8 @@ a.btn-sm {
   color: #f4ede4;
   font-family: var(--font-sans);
   font-size: 11px;
-  white-space: nowrap;
+  line-height: 1.2;
+  white-space: normal;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -2202,6 +2205,57 @@ a.btn-sm {
 
 .marker-pill-name {
   font-weight: 700;
+  /* Long names wrap onto two lines instead of one wide bar; full name is in the popup */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.mode-sub {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.mode-tab.active .mode-sub {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.filter-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin: -2px 0 8px;
+}
+
+.filter-summary {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: var(--border-radius-sm);
+  background: rgba(45, 106, 79, 0.18);
+  border: 1px dashed rgba(82, 183, 136, 0.45);
+  font-size: 0.74rem;
+  color: var(--text-main);
+}
+
+.filter-summary.summary-empty {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fcd34d;
+}
+
+@keyframes chip-flash {
+  0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.9); }
+  100% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
+}
+
+.chip-flash {
+  animation: chip-flash 0.7s ease-out 2;
 }
 
 .marker-pill-event {
@@ -2232,11 +2286,15 @@ a.btn-sm {
 /* 2. Zoom 8-9: Mid view - Emoji + short location name */
 .map-zoom-mid .custom-marker-pill {
   padding: 2px 7px;
-  border-radius: 14px;
+  border-radius: 10px;
   gap: 4px;
 }
 .map-zoom-mid .marker-pill-name {
-  display: inline-block !important;
+  display: -webkit-box !important;
+}
+
+.map-zoom-mid .custom-marker-pill {
+  max-width: 140px;
 }
 .map-zoom-mid .marker-pill-event {
   display: none !important;
@@ -2244,12 +2302,22 @@ a.btn-sm {
 
 /* 3. Zoom >= 10: Close view - Full pill with event details */
 .map-zoom-close .custom-marker-pill {
-  padding: 3px 8px;
-  border-radius: 20px;
+  padding: 4px 9px;
+  border-radius: 12px;
+  flex-wrap: wrap;
+  max-width: 190px;
+  row-gap: 1px;
 }
-.map-zoom-close .marker-pill-name,
+.map-zoom-close .marker-pill-name {
+  display: -webkit-box !important;
+  flex: 1 1 0;
+  min-width: 0;
+}
+/* Event text gets its own line under the name instead of squeezing it */
 .map-zoom-close .marker-pill-event {
-  display: inline-block !important;
+  display: block !important;
+  flex-basis: 100%;
+  padding-left: 19px;
 }
 
 /* iNaturalist live markers */

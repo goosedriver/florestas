@@ -60,7 +60,7 @@ c:\Users\alebedev\Documents\antigravity\Florestas\
   - Top header with trilingual language switcher (`ru`, `pt`, `en`) and official data badge.
   - Sidebar:
     - Time Machine calendar: Month dropdown (1–12) and Decade selector (`early` 1–10, `mid` 11–20, `late` 21–31) with dynamic season summary banner.
-    - Exploration Mode tabs: *Visão Geral* (`all`), *Trilhos de Outono* (`autumn_walk`), *Flor & Fruto* (`blooming_fruiting`).
+    - Preset tabs (`FILTER_PRESETS`): *Visão Geral* (no filters), *Trilhos de Outono* (deciduous × golden foliage), *Flor & Fruto* (flowering + fruiting). A preset only sets the chips below (visibly, with a flash); a tab is highlighted only while the chips match it exactly.
     - Forest Type filter pills: All, Eucalyptus, Pine, Deciduous, Montado, Orchards & Carob.
     - Phenology filter pills: All, Flowering, Fruiting, Golden Foliage, Fallen Leaves, Evergreen.
     - Active Phenomenon breakdown card (`#card-active-phenomenon`): Live chips of blooming/fruiting/yellowing species for the selected decade.
@@ -90,15 +90,16 @@ c:\Users\alebedev\Documents\antigravity\Florestas\
     - `sources`: 5 official sources (DGT COS, DGT CPV, ICNF IFN6, Flora-On, iNaturalist).
     - `wmsConfig`: Official GeoServer endpoint (`https://geo2.dgterritorio.gov.pt/geoserver/ows`), layer ID `COS-S2:cos2025v1-s2`.
     - `species`: 16 core Portuguese tree and shrub taxa with exact `dgtCosCodes`, `inatTaxonId`, phenological calendars (`floweringMonths`, `fruitingMonths`, `autumnTiming`), and trilingual descriptions.
-    - `locations`: 36 verified forested serras, national/natural parks, and national forests with GPS coordinates, elevation, regional phenology, and verified walking trails.
+    - `locations`: 55 forested serras, national/natural parks, and national forests with GPS coordinates, elevation, regional phenology, and walking trails. Newer records also carry `sources` (URLs read) and `sourceNotes` (uncertainties). Rules: `speciesIds` only where a source names the tree as dominant/notable — an empty list renders as "no species data" (`foliage.status: 'unknown'`), never as evergreen; `trails` empty when no marked trail is documented (never invent PR codes); `autumnWalkRating` may be `null` (no rating shown).
+    - Maples, poplars and ash are not modelled as species: sourced flowering months exist (Flora iberica, UTAD) but no sourced autumn-colour timing for Portugal. They are covered on the map only through COS 5.1.1.8 inside the "deciduous" chip.
     - `regionalStats`: Forest distribution percentages from IFN6 (Norte, Centro, Lisboa e Vale do Tejo, Alentejo, Algarve).
     - `cosN4Translations`: Complete dictionary of all 101 official DGT COS Level 4 classes (`1.1.1.1` to `9.3.4.1`) with `ru`, `pt`, `en`, and `isForest` flag.
 
 - **`app.js`**:
-  - State machine: `state.lang`, `state.month`, `state.decade`, `state.mode`, `state.forestType`, `state.phenoState`, `state.specificSpecies`, `state.wmsEnabled`, `state.markersVisible`, `state.inspectedParcel`.
+  - State machine: `state.lang`, `state.month`, `state.decade`, `state.forestTypes` (Set), `state.phenoStates` (Set), `state.specificSpecies`, `state.wmsEnabled`, `state.markersVisible`, `state.inspectedParcel`.
   - Base maps: Esri World Dark Gray Canvas (default), Esri World Topographic Map (`World_Topo_Map`), and Esri Satellite (`World_Imagery`) — all 100% free, keyless, watermark-free, and compatible with `file:///` (do NOT use `tile.openstreetmap.org`, as OSM blocks `file:///` requests lacking an HTTP `Referer` header with HTTP 403).
   - DGT WMS integration: Real-time `setParams({ CQL_FILTER: cql, _t: Date.now() })` cache-busting.
-  - Filter coordination: Mutual reset between Forest Type, Phenology, Species, and Mode.
+  - Filter model: forest-type and phenology chips are multi-select — OR inside a group, AND between groups. The WMS CQL is the intersection of the two COS code sets (`getActiveCodeSet()`); an empty intersection must show `NONE` with an explanation, never fall back to unfiltered polygons. Picking a single species overrides and clears the chips. `#filter-summary` states what is on the map.
   - `onMapClick(e)`: Issues WMS `GetFeatureInfo` in EPSG:4326/JSON to DGT GeoServer; extracts polygon GeoJSON and highlights it on map (`highlightParcelLayer`); resolves N4 code via `getParcelTranslation` and renders parcel in inspector.
   - Real-time active layer explainer updater (`updateActiveLayerExplainer()`).
   - Public interface exported on `window.florestasApp`.

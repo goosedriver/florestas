@@ -2825,6 +2825,784 @@
         "pt": "PR1 FND — Rota da Gardunha e Castelo Novo",
         "en": "PR1 FND — Gardunha Crest & Castelo Novo Historic Trail"
       }
+    },
+    {
+      "id": "mata_choupal",
+      "names": {
+        "ru": "Национальный лес Шоупал (Коимбра)",
+        "pt": "Mata Nacional do Choupal (Coimbra)",
+        "en": "Choupal National Forest (Coimbra)"
+      },
+      "lat": 40.2219,
+      "lng": -8.4461,
+      "radiusKm": 3,
+      "elevationM": 23,
+      "region": "Centro",
+      "autumnTimingZone": "lowland_coastal",
+      "dominantCategory": "deciduous",
+      "categories": [
+        "deciduous"
+      ],
+      "speciesIds": [],
+      "autumnWalkRating": null,
+      "sourceRef": "ICNF / Wikipedia",
+      "summary": {
+        "ru": "Прибрежный национальный лес на берегу Мондегу в Коимбре, созданный для смягчения паводков. В составе — тополь, ольха, ясень, ива, вяз и каркас южный; площадь около 80 га.",
+        "pt": "Mata ribeirinha nas margens do Mondego, em Coimbra, criada para atenuar as cheias. Inclui choupo, amieiro, freixo, salgueiros, ulmeiro e lodão; ocupa cerca de 80 ha.",
+        "en": "Riverside national forest on the Mondego in Coimbra, created to curb floods. Poplar, alder, ash, willow, elm and nettle tree; about 80 ha."
+      },
+      "trails": {
+        "ru": "Пешеходные дорожки «Floresta Viva» и «Vida Aquática»",
+        "pt": "Percursos pedonais «Floresta Viva» e «Vida Aquática»",
+        "en": "Walking paths \"Floresta Viva\" and \"Vida Aquática\""
+      },
+      "sources": [
+        "https://pt.wikipedia.org/wiki/Mata_Nacional_do_Choupal",
+        "https://en.wikipedia.org/wiki/Choupal_National_Forest",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Coordinates from en.wikipedia (40.22194, -8.44611). No tree on the allowed species list is documented as dominant, so speciesIds is empty. Area ~80 ha per pt.wikipedia. Walking paths have no PR code in sources. About 6 km from Vale de Canas (both Coimbra, distinct forests). Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "mata_vale_canas",
+      "names": {
+        "ru": "Национальный лес Вале-де-Канаш (Коимбра)",
+        "pt": "Mata Nacional de Vale de Canas (Coimbra)",
+        "en": "Vale de Canas National Forest (Coimbra)"
+      },
+      "lat": 40.2104,
+      "lng": -8.3728,
+      "radiusKm": 3,
+      "elevationM": 155,
+      "region": "Centro",
+      "autumnTimingZone": "lowland_coastal",
+      "dominantCategory": "eucalyptus",
+      "categories": [
+        "eucalyptus",
+        "deciduous"
+      ],
+      "speciesIds": [
+        "castanea_sativa"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "ICNF / Wikipedia",
+      "summary": {
+        "ru": "Национальный лес площадью 16 га с коллекцией из 32 видов эвкалипта (здесь растёт самый высокий в Европе Eucalyptus diversicolor). После пожара 2005 года лес восстанавливают местными породами, в первую очередь каштаном.",
+        "pt": "Mata nacional de 16 ha com 32 espécies de eucalipto, incluindo o Eucalyptus diversicolor, a árvore mais alta da Europa. Após o incêndio de 2005 está em reflorestação, com preferência por espécies autóctones como o castanheiro.",
+        "en": "A 16 ha national forest with 32 eucalyptus species, including Eucalyptus diversicolor, the tallest tree in Europe. After the 2005 fire it is being replanted with native species such as sweet chestnut."
+      },
+      "trails": {
+        "ru": "",
+        "pt": "",
+        "en": ""
+      },
+      "sources": [
+        "https://pt.wikipedia.org/wiki/Mata_Nacional_de_Vale_de_Canas",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Eucalyptus here are an arboretum of many species (E. diversicolor), so eucalyptus_globulus is NOT listed; dominantCategory 'eucalyptus' reflects the arboretum, treat as uncertain. Chestnut is named only as a reforestation priority. No marked trail found. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "serra_malcata",
+      "names": {
+        "ru": "Резерват Серра-да-Малката (Сабугал и Пенамакор)",
+        "pt": "Reserva Natural da Serra da Malcata (Penamacor e Sabugal)",
+        "en": "Serra da Malcata Nature Reserve (Penamacor & Sabugal)"
+      },
+      "lat": 40.2333,
+      "lng": -7.0333,
+      "radiusKm": 8,
+      "elevationM": 771,
+      "region": "Centro",
+      "autumnTimingZone": "mid_mountain",
+      "dominantCategory": "deciduous",
+      "categories": [
+        "deciduous"
+      ],
+      "speciesIds": [
+        "quercus_pyrenaica",
+        "arbutus_unedo"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Município de Penamacor / Wikipedia",
+      "summary": {
+        "ru": "Природный резерват (с 1981 г.), созданный для охраны иберийской рыси. На маршруте PR5 встречаются дубравы и земляничные рощи (medronhal) с боярышником; высшая точка хребта — 1078 м.",
+        "pt": "Reserva natural criada em 1981 para proteger o lince-ibérico. No PR5 – Sobreiral atravessam-se carvalhais e medronhais, com pilriteiros; o ponto mais alto da serra tem 1078 m.",
+        "en": "Nature reserve (since 1981) created to protect the Iberian lynx. The PR5 – Sobreiral trail crosses oak woods and strawberry-tree groves with hawthorn; the range's highest point is 1078 m."
+      },
+      "trails": {
+        "ru": "PR5 — Sobreiral (Пенамакор, плотина Мейоа)",
+        "pt": "PR5 — Sobreiral (Penamacor, Barragem da Meimoa)",
+        "en": "PR5 — Sobreiral (Penamacor, Meimoa Dam)"
+      },
+      "sources": [
+        "https://pt.wikipedia.org/wiki/Serra_da_Malcata",
+        "https://www.cm-penamacor.pt/turismo-e-lazer/rede-de-percursos-pedestres/galeria-55",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Coordinates from pt.wikipedia (40.23333,-7.03333); summit 1078 m. Municipal page says 'carvalhal' and 'medronhal' without naming the oak; quercus_pyrenaica rests on a geocaching text (north of the range) and is uncertain. PR5 municipal code suffix not shown on the page read, so omitted. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "serra_montejunto",
+      "names": {
+        "ru": "Серра-ди-Монтежунту (Каданал и Аленкер)",
+        "pt": "Serra de Montejunto (Cadaval e Alenquer)",
+        "en": "Serra de Montejunto Protected Landscape (Cadaval & Alenquer)"
+      },
+      "lat": 39.175,
+      "lng": -9.05,
+      "radiusKm": 6,
+      "elevationM": 593,
+      "region": "Lisboa e Vale do Tejo",
+      "autumnTimingZone": "mid_mountain",
+      "dominantCategory": "deciduous",
+      "categories": [
+        "deciduous"
+      ],
+      "speciesIds": [],
+      "autumnWalkRating": null,
+      "sourceRef": "Wikipedia / ICNF",
+      "summary": {
+        "ru": "Известняковый хребет 666 м между Каданалом и Аленкером, самая высокая точка Эштремадуры; охраняемый ландшафт. Известен реликтовой дубравой и эндемичной известняковой флорой.",
+        "pt": "Serra calcária de 666 m entre o Cadaval e Alenquer, o miradouro natural mais alto da Estremadura; paisagem protegida. Tem um carvalhal reliquial e flora endémica dos calcários.",
+        "en": "A 666 m limestone ridge between Cadaval and Alenquer, the highest natural lookout in Estremadura; protected landscape. It holds a relict oak wood and limestone endemic flora."
+      },
+      "trails": {
+        "ru": "",
+        "pt": "",
+        "en": ""
+      },
+      "sources": [
+        "https://pt.wikipedia.org/wiki/Serra_de_Montejunto",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Coordinates from pt.wikipedia (39.175,-9.05); summit 666 m. The oak species of the 'carvalhal reliquial' is not named in the source read, so speciesIds is empty; other web sources say much of the area is scrub or holm-oak (conflicting) - uncertain dominantCategory. No marked trail verified. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "serra_freita",
+      "names": {
+        "ru": "Серра-да-Фрейта (Ароука)",
+        "pt": "Serra da Freita (Arouca)",
+        "en": "Serra da Freita (Arouca Geopark)"
+      },
+      "lat": 40.867,
+      "lng": -8.2669,
+      "radiusKm": 6,
+      "elevationM": 970,
+      "region": "Centro",
+      "autumnTimingZone": "high_mountain",
+      "dominantCategory": "deciduous",
+      "categories": [
+        "deciduous"
+      ],
+      "speciesIds": [
+        "quercus_robur",
+        "quercus_pyrenaica"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Arouca Geopark / Wikipedia",
+      "summary": {
+        "ru": "Горный массив Ароука высотой до 1100 м с водопадом Фрекья-да-Мизарела (60+ м). По склонам растут дуб черешчатый и дуб пиренейский, у подножия водопада — реликтовый рододендрон.",
+        "pt": "Maciço de Arouca com altitude máxima de 1100 m e a cascata da Frecha da Mizarela (mais de 60 m). Nas escarpas ocorrem carvalho-roble e carvalho-negral e, na base da cascata, o rododendro relíquia.",
+        "en": "Arouca massif up to 1100 m with the Frecha da Mizarela waterfall (over 60 m). Pedunculate and Pyrenean oaks grow on the escarpments, with relict rhododendron at the waterfall base."
+      },
+      "trails": {
+        "ru": "PR7 — Nas Escarpas da Mizarela; PR15 — Viagem à Pré-História",
+        "pt": "PR7 — Nas Escarpas da Mizarela; PR15 — Viagem à Pré-História",
+        "en": "PR7 — Nas Escarpas da Mizarela; PR15 — Journey into Prehistory"
+      },
+      "sources": [
+        "https://pt.wikipedia.org/wiki/Serra_da_Freita",
+        "https://aroucageopark.pt/?p=12534",
+        "https://aroucageopark.pt/en/hiking-trails/journey-into-prehistory/",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Coordinates from Nominatim (Serra da Freita). Geopark page gives PR7 and PR15 without suffix. Trail codes given as on the Geopark page (no municipal suffix). Maximum altitude 1100 m (pt.wikipedia). Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "carvalhal_vouzela",
+      "names": {
+        "ru": "Дубравы Вузелы (Камбра и Карвальял-де-Вермильяс)",
+        "pt": "Carvalhal de Vouzela (Cambra e Carvalhal de Vermilhas)",
+        "en": "Vouzela Oak Woods (Cambra & Carvalhal de Vermilhas)"
+      },
+      "lat": 40.6713,
+      "lng": -8.163,
+      "radiusKm": 5,
+      "elevationM": 578,
+      "region": "Centro",
+      "autumnTimingZone": "mid_mountain",
+      "dominantCategory": "deciduous",
+      "categories": [
+        "deciduous"
+      ],
+      "speciesIds": [
+        "quercus_robur"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Município de Vouzela",
+      "summary": {
+        "ru": "В Вузеле сохранился значительный массив естественных дубрав, которые здесь по-прежнему преобладают. Маршрут PR9 VZL «Quercus Robur» отмечает выдающиеся экземпляры дуба черешчатого.",
+        "pt": "Em Vouzela manteve-se uma parte importante da floresta natural, com o carvalhal ainda predominante. O PR9 VZL – Percurso Quercus Robur assinala carvalhos notáveis (Quercus robur).",
+        "en": "In Vouzela an important part of the natural forest survives, with oak woodland still predominant. The PR9 VZL Quercus Robur trail features outstanding pedunculate oaks."
+      },
+      "trails": {
+        "ru": "PR9 VZL — Percurso Quercus Robur",
+        "pt": "PR9 VZL — Percurso Quercus Robur",
+        "en": "PR9 VZL — Quercus Robur Trail"
+      },
+      "sources": [
+        "https://www.cm-vouzela.pt/wp-content/uploads/2024/06/Folheto_Vouzela_PR9.pdf",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Marker placed at the centre of the Cambra e Carvalhal de Vermilhas parish (Nominatim); the leaflet read does not state the trail start point, so the position is approximate. Leaflet gives code 'PR9 VZL'. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "serra_nogueira",
+      "names": {
+        "ru": "Серра-да-Ногейра (Браганса)",
+        "pt": "Serra da Nogueira (Bragança)",
+        "en": "Serra da Nogueira (Bragança)"
+      },
+      "lat": 41.7175,
+      "lng": -6.8558,
+      "radiusKm": 7,
+      "elevationM": 1300,
+      "region": "Norte",
+      "autumnTimingZone": "high_mountain",
+      "dominantCategory": "deciduous",
+      "categories": [
+        "deciduous"
+      ],
+      "speciesIds": [
+        "quercus_pyrenaica"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Geopark Terras de Cavaleiros / Wikipedia",
+      "summary": {
+        "ru": "Горный хребет высотой 1319 м в Алту-Траш-уш-Монтиш, часть участка Натура 2000 Монтезинью/Ногейра, где находятся самые обширные и хорошо сохранившиеся дубравы пиренейского дуба в стране.",
+        "pt": "Serra de 1319 m no Alto Trás-os-Montes, integrada no sítio Natura 2000 Montesinho/Nogueira, onde estão os mais extensos e bem conservados carvalhais de carvalho-negral do país.",
+        "en": "A 1319 m range in Alto Trás-os-Montes, within the Montesinho/Nogueira Natura 2000 site, which holds the most extensive and best-preserved Pyrenean oak woods in Portugal."
+      },
+      "trails": {
+        "ru": "PR17 MDC — Rota Mourisco",
+        "pt": "PR17 MDC — Rota Mourisco",
+        "en": "PR17 MDC — Rota Mourisco"
+      },
+      "sources": [
+        "https://pt.wikipedia.org/wiki/Serra_da_Nogueira",
+        "https://www.terrasdetrasosmontes.pt/terrasdetrasosmontes/uploads/writer_file/document/897/pr17mdc.pdf",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Coordinates from pt.wikipedia (41.7175,-6.85583); summit 1319 m. Rota Mourisco leaflet (Geopark Terras de Cavaleiros) reaches 1100 m at Pena Mourisca. About 17 km from the existing Montesinho marker. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "serra_bornes",
+      "names": {
+        "ru": "Серра-ди-Борнеш (Маседу-де-Кавалейруш)",
+        "pt": "Serra de Bornes (Macedo de Cavaleiros)",
+        "en": "Serra de Bornes (Macedo de Cavaleiros)"
+      },
+      "lat": 41.4344,
+      "lng": -7.0069,
+      "radiusKm": 6,
+      "elevationM": 1183,
+      "region": "Norte",
+      "autumnTimingZone": "high_mountain",
+      "dominantCategory": "deciduous",
+      "categories": [
+        "deciduous",
+        "pine"
+      ],
+      "speciesIds": [
+        "castanea_sativa"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Geopark Terras de Cavaleiros / Wikipedia",
+      "summary": {
+        "ru": "Гора высотой 1200 м на юге муниципалитета Маседу-де-Кавалейруш. На маршруте PR19 грибы собирают в сосновых борах, дубравах и каштановых рощах.",
+        "pt": "Elevação de 1200 m no sul do concelho de Macedo de Cavaleiros. No PR19 encontram-se cogumelos entre pinhais, carvalhais e castinçais.",
+        "en": "A 1200 m mountain in the south of Macedo de Cavaleiros. On the PR19 trail edible mushrooms grow among pine, oak and chestnut woods."
+      },
+      "trails": {
+        "ru": "PR19 MDC — Pequena Rota dos Cogumelos",
+        "pt": "PR19 MDC — Pequena Rota dos Cogumelos",
+        "en": "PR19 MDC — Mushroom Trail (Pequena Rota dos Cogumelos)"
+      },
+      "sources": [
+        "https://pt.wikipedia.org/wiki/Serra_de_Bornes",
+        "https://www.terrasdetrasosmontes.pt/terrasdetrasosmontes/uploads/writer_file/document/899/pr19mdc.pdf",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Coordinates from pt.wikipedia (41.43444,-7.00694) = summit area. Leaflet names pine, oak and chestnut woods without pine/oak species, so only castanea_sativa (castinçais) is listed. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "douro_internacional",
+      "names": {
+        "ru": "Природный парк Дору-Интернасьонал",
+        "pt": "Parque Natural do Douro Internacional (Miranda e Mogadouro)",
+        "en": "Douro International Natural Park (Miranda & Mogadouro)"
+      },
+      "lat": 41.2667,
+      "lng": -6.6397,
+      "radiusKm": 8,
+      "elevationM": 689,
+      "region": "Norte",
+      "autumnTimingZone": "mid_mountain",
+      "dominantCategory": "evergreen_broadleaf",
+      "categories": [
+        "evergreen_broadleaf",
+        "orchard_shrub"
+      ],
+      "speciesIds": [
+        "quercus_rotundifolia",
+        "quercus_suber",
+        "prunus_dulcis"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "ICNF / Visit Portugal / Wikipedia",
+      "summary": {
+        "ru": "Природный парк (1998) вдоль пограничной части реки Дору, около 868 км2. Среди растительности — можжевельник, каменный и пробковый дубы, а также миндальные сады, цветущие в феврале–марте.",
+        "pt": "Parque natural (1998) ao longo do troço fronteiriço do Douro, com cerca de 868 km2. A vegetação inclui zimbrais, azinheiras, sobreiros e amendoais, que florescem em fevereiro–março.",
+        "en": "Natural park (1998) along the border stretch of the Douro, about 868 km2. Vegetation includes juniper, holm and cork oaks and almond groves that bloom in February-March."
+      },
+      "trails": {
+        "ru": "",
+        "pt": "",
+        "en": ""
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Douro_International_Natural_Park",
+        "https://www.visitportugal.com/pt-pt/content/parque-natural-do-douro-internacional",
+        "https://lifecooler.com/artigo/atividades/parque-natural-do-douro-internacional/306274",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Marker = park centre from en.wikipedia (41.2667,-6.6397); DEM at that point 689 m (canyon floors are far lower, roughly 100-300 m). Species list from a search summary of Visit Portugal/Lifecooler text (juniper not in allowed ids). Third-party sites list unnumbered routes (Percurso do Douro, Vale da Ribeira do Mosteiro) but no official PR code, so trails left empty. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "tejo_internacional",
+      "names": {
+        "ru": "Природный парк Тежу-Интернасьонал",
+        "pt": "Parque Natural do Tejo Internacional (Idanha-a-Nova e Castelo Branco)",
+        "en": "Tejo Internacional Natural Park (Idanha-a-Nova & Castelo Branco)"
+      },
+      "lat": 39.7674,
+      "lng": -7.2001,
+      "radiusKm": 8,
+      "elevationM": 224,
+      "region": "Centro",
+      "autumnTimingZone": "lowland_coastal",
+      "dominantCategory": "montado",
+      "categories": [
+        "montado",
+        "evergreen_broadleaf"
+      ],
+      "speciesIds": [
+        "quercus_suber",
+        "quercus_rotundifolia"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Wikipedia / IPCB",
+      "summary": {
+        "ru": "Парк вдоль пограничного участка Тежу (трансграничный биосферный резерват ЮНЕСКО с 2016 г.). Растительность — леса пробкового и каменного дубов и ивовые галереи вдоль рек.",
+        "pt": "Parque ao longo do troço fronteiriço do Tejo (reserva da biosfera transfronteiriça da UNESCO desde 2016). A vegetação inclui bosques de sobreiros e azinheiras e galerias ripícolas de salgueiros.",
+        "en": "Park along the border stretch of the Tagus (UNESCO transboundary biosphere reserve since 2016). Vegetation includes cork-oak and holm-oak woods and riparian willow galleries."
+      },
+      "trails": {
+        "ru": "",
+        "pt": "",
+        "en": ""
+      },
+      "sources": [
+        "https://pt.wikipedia.org/wiki/Parque_Natural_do_Tejo_Internacional",
+        "https://repositorio.ipcb.pt/bitstream/10400.11/7026/1/Flora_Vegetacao_PNTI.pdf",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Marker = Nominatim position of the park (39.7674,-7.2001). No official marked PR trail found (only an academic proposal), so trails empty. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "serra_boa_viagem",
+      "names": {
+        "ru": "Серра-да-Боа-Виажен (Фигейра-да-Фош)",
+        "pt": "Serra da Boa Viagem (Figueira da Foz)",
+        "en": "Serra da Boa Viagem (Figueira da Foz)"
+      },
+      "lat": 40.19,
+      "lng": -8.86,
+      "radiusKm": 4,
+      "elevationM": 176,
+      "region": "Centro",
+      "autumnTimingZone": "lowland_coastal",
+      "dominantCategory": "pine",
+      "categories": [
+        "pine",
+        "eucalyptus"
+      ],
+      "speciesIds": [
+        "pinus_pinaster"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Wikipedia / Lusa",
+      "summary": {
+        "ru": "Прибрежная гора 262 м к северу от Фигейра-да-Фош с лесопарком около 400 га (с 1926 г.). Растительность — приморская сосна, португальский кипарис, утёсник и вереск.",
+        "pt": "Serra litoral de 262 m a norte da Figueira da Foz com parque florestal de cerca de 400 ha (de 1926). A vegetação é de pinheiro-bravo, cipreste-português, tojo e urze.",
+        "en": "Coastal hill of 262 m north of Figueira da Foz with a forest park of about 400 ha (from 1926). Vegetation is maritime pine, Portuguese cypress, gorse and heather."
+      },
+      "trails": {
+        "ru": "",
+        "pt": "",
+        "en": ""
+      },
+      "sources": [
+        "https://pt.wikipedia.org/wiki/Serra_da_Boa_Viagem",
+        "https://www.rtp.pt/noticias/pais/serra-da-boa-viagem-na-figueira-da-foz-destruida-pela-tempestade-leslie_n1106593",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Coordinates from pt.wikipedia (40.19,-8.86); summit 261.88 m. Eucalyptus is mentioned in news about the core park but the species is not named. No marked trail verified. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "mata_machada",
+      "names": {
+        "ru": "Национальный лес Машада (Барейру)",
+        "pt": "Mata Nacional da Machada (Barreiro)",
+        "en": "Machada National Forest (Barreiro)"
+      },
+      "lat": 38.6097,
+      "lng": -9.0271,
+      "radiusKm": 4,
+      "elevationM": 34,
+      "region": "AML",
+      "autumnTimingZone": "lowland_coastal",
+      "dominantCategory": "pine",
+      "categories": [
+        "pine",
+        "montado",
+        "eucalyptus"
+      ],
+      "speciesIds": [
+        "pinus_pinaster",
+        "pinus_pinea",
+        "quercus_suber"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Câmara Municipal do Barreiro / ICNF",
+      "summary": {
+        "ru": "Национальный лес около 370–387 га в Барейру: приморская и средиземноморская сосны, пробковый дуб и эвкалипт. Муниципальная карта показывает пешие маршруты 3,7, 8,3 и 10,4 км.",
+        "pt": "Mata nacional de cerca de 370–387 ha no Barreiro, com pinheiro-bravo e pinheiro-manso, sobreiral e eucaliptal. O mapa municipal indica percursos pedestres de 3,7, 8,3 e 10,4 km.",
+        "en": "National forest of about 370-387 ha in Barreiro with maritime and stone pine, cork oak and eucalyptus. The municipal map shows walking trails of 3.7, 8.3 and 10.4 km."
+      },
+      "trails": {
+        "ru": "Пешие маршруты: лёгкий 3,7 км, средний 8,3 км, сложный 10,4 км (без кода PR)",
+        "pt": "Percursos pedestres: fácil 3,7 km, médio 8,3 km, difícil 10,4 km (sem código PR)",
+        "en": "Walking trails: easy 3.7 km, medium 8.3 km, difficult 10.4 km (no PR code)"
+      },
+      "sources": [
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://www.cm-barreiro.pt/wp-content/uploads/2023/04/2022_10_31_mapa_machada-1.pdf",
+        "https://cm-barreiro.pt/wp-content/uploads/2024/03/Deliberacao-no-08-2024-Saudacao-Dia-Internacional-das-Florestas-Dia-Mundial-da-Arvora.pdf",
+        "https://www.timeout.pt/lisboa/pt/coisas-para-fazer/mata-nacional-da-machada",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Area figures differ by source (370/380/387 ha). Species and trail info from a web-search summary of the Barreiro council map/resolution and Time Out; map pdf not read directly. About 14 km from Mata dos Medos. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "mata_vrsa",
+      "names": {
+        "ru": "Национальный лес дюн Вила-Реал-де-Санту-Антониу",
+        "pt": "Mata Nacional das Dunas Litorais de Vila Real de Santo António",
+        "en": "Vila Real de Santo António Coastal Dunes National Forest"
+      },
+      "lat": 37.1856,
+      "lng": -7.4359,
+      "radiusKm": 4,
+      "elevationM": 6,
+      "region": "Algarve",
+      "autumnTimingZone": "south",
+      "dominantCategory": "pine",
+      "categories": [
+        "pine"
+      ],
+      "speciesIds": [
+        "pinus_pinaster",
+        "pinus_pinea"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Município de VRSA / ICNF",
+      "summary": {
+        "ru": "Лесной массив на дюнах между Вила-Реал-де-Санту-Антониу и Монте-Гордо, посаженный в 1902 году, около 435 га. Служит для закрепления дюн; высажены приморская и средиземноморская сосны.",
+        "pt": "Mata plantada em 1902 sobre as dunas entre Vila Real de Santo António e Monte Gordo, com cerca de 435 ha, para fixar o sistema dunar. Plantaram-se pinheiro-bravo e pinheiro-manso.",
+        "en": "Forest planted in 1902 on the dunes between Vila Real de Santo António and Monte Gordo, about 435 ha, to stabilise the dune system. Maritime and stone pine were planted."
+      },
+      "trails": {
+        "ru": "Пешеходные маршруты 1 и 3 (муниципальная брошюра, без кода PR)",
+        "pt": "Percursos pedestres 1 e 3 da Mata Nacional (folheto municipal, sem código PR)",
+        "en": "Pedestrian routes 1 and 3 of the National Forest (municipal leaflet, no PR code)"
+      },
+      "sources": [
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://www.baixoguadiana.com/media/route_files/folheto-mata-nacional-vrsa.pdf",
+        "https://postal.pt/atual/vrsa-plantados-150-pinheiros-mansos-em-mata-nacional-litoral",
+        "https://first-nature.com/algarve/papa-figos/papa-figos-jun17-montegordo.php",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Area 435 ha from the municipal leaflet (first-nature says 430). Pine species per press/first-nature text. Trail names are only 'Percurso 1 / Percurso 3' on the leaflet map. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "serra_monfurado",
+      "names": {
+        "ru": "Монфурадо (Эвора и Монтемор-у-Нову)",
+        "pt": "Sítio de Monfurado (Évora e Montemor-o-Novo)",
+        "en": "Monfurado Site (Évora & Montemor-o-Novo)"
+      },
+      "lat": 38.5786,
+      "lng": -8.1981,
+      "radiusKm": 6,
+      "elevationM": 311,
+      "region": "Alentejo",
+      "autumnTimingZone": "south",
+      "dominantCategory": "montado",
+      "categories": [
+        "montado"
+      ],
+      "speciesIds": [
+        "quercus_suber",
+        "quercus_rotundifolia"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Câmara Municipal de Évora / Natura 2000",
+      "summary": {
+        "ru": "Участок Натура 2000 (PTCON0031) с хорошо сохранившимися монтаду из пробкового и каменного дуба между Эворой и Монтемор-у-Нову; важен для охраны летучих мышей.",
+        "pt": "Sítio Natura 2000 (PTCON0031) dominado por montados de sobro e azinho bem conservados, entre Évora e Montemor-o-Novo; importante para os morcegos.",
+        "en": "Natura 2000 site (PTCON0031) dominated by well-preserved cork-oak and holm-oak montado between Évora and Montemor-o-Novo; important for bats."
+      },
+      "trails": {
+        "ru": "",
+        "pt": "",
+        "en": ""
+      },
+      "sources": [
+        "https://www.cm-evora.pt/wp-content/uploads/2020/11/CaractSituacaoReferencia.pdf",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Marker at 'Monfurado' locality, Nominatim (38.5786,-8.1981). The 'Percursos Ambientais de Monfurado' rural-road network exists but one section was reported closed (2013) and no PR code found, so trails empty. Content from a web-search summary; PDF not read directly. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "vale_guadiana",
+      "names": {
+        "ru": "Природный парк Долина Гвадианы (Мертола и Серпа)",
+        "pt": "Parque Natural do Vale do Guadiana (Mértola e Serpa)",
+        "en": "Guadiana Valley Natural Park (Mértola & Serpa)"
+      },
+      "lat": 37.6506,
+      "lng": -7.645,
+      "radiusKm": 8,
+      "elevationM": 73,
+      "region": "Alentejo",
+      "autumnTimingZone": "south",
+      "dominantCategory": "evergreen_broadleaf",
+      "categories": [
+        "evergreen_broadleaf"
+      ],
+      "speciesIds": [
+        "quercus_rotundifolia"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "ICNF / Wikipedia",
+      "summary": {
+        "ru": "Природный парк (1995) площадью около 697 км2 на Гвадиане между водопадом Пулу-ду-Лобу и устьем Васкана. В парке есть участки каменного дуба и приморской сосны, а также средиземноморские заросли.",
+        "pt": "Parque natural (1995) com cerca de 697 km2 no Guadiana, entre o Pulo do Lobo e a foz do Vascão. Inclui manchas de azinheira e pinheiro-bravo e matos mediterrânicos.",
+        "en": "Natural park (1995) of about 697 km2 on the Guadiana between Pulo do Lobo and the Vascão confluence. It includes holm-oak and maritime-pine stands and Mediterranean scrub."
+      },
+      "trails": {
+        "ru": "Маршруты парка: Mesquita (3 км), Bombeira (6 км), Carvoeiro/Água Alta e Canais (9 км), São Domingos (19 км)",
+        "pt": "Percursos do parque: Mesquita (3 km), Bombeira (6 km), Carvoeiro/Água Alta e Canais (9 km), São Domingos (19 km)",
+        "en": "Park trails: Mesquita (3 km), Bombeira (6 km), Carvoeiro/Água Alta e Canais (9 km), São Domingos (19 km)"
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Guadiana_Valley_Natural_Park",
+        "https://www.visitportugal.com/pt-pt/content/parque-natural-do-vale-do-guadiana",
+        "https://lifecooler.com/artigo/atividades/parque-natural-do-vale-do-guadiana/355385",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Coordinates from en.wikipedia (37°39'02\"N 7°38'42\"W). Oak presence rests on a 2007 fire report and an ICNF publication snippet (no inventory read) - speciesIds uncertain. Trail names/lengths from a search summary of tourism listings; no codes. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "serra_arga",
+      "names": {
+        "ru": "Серра-д'Арга (Каминья, Виана и Понте-де-Лима)",
+        "pt": "Serra d'Arga (Caminha, Viana e Ponte de Lima)",
+        "en": "Serra d'Arga (Caminha, Viana & Ponte de Lima)"
+      },
+      "lat": 41.8155,
+      "lng": -8.7158,
+      "radiusKm": 6,
+      "elevationM": 739,
+      "region": "Norte",
+      "autumnTimingZone": "mid_mountain",
+      "dominantCategory": "deciduous",
+      "categories": [
+        "deciduous"
+      ],
+      "speciesIds": [
+        "castanea_sativa",
+        "arbutus_unedo",
+        "quercus_suber"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Município de Caminha / Natura 2000",
+      "summary": {
+        "ru": "Горный массив Натура 2000 площадью около 4500 га между реками Лима и Коура, высшая точка Алту-ду-Эшпиньейру 825 м. На тропе Педра-Алсада описаны дубы, пробковые дубы, каштаны, земляничные деревья, падуб и лавр.",
+        "pt": "Maciço da Rede Natura 2000 com cerca de 4500 ha entre os rios Lima e Coura, com 825 m no Alto do Espinheiro. No Trilho da Pedra Alçada são referidos carvalhos, sobreiros, castanheiros, medronheiros, azevinhos e loureiros.",
+        "en": "Natura 2000 massif of about 4500 ha between the Lima and Coura rivers, 825 m at Alto do Espinheiro. The Pedra Alçada trail passes oaks, cork oaks, chestnuts, strawberry trees, holly and laurel."
+      },
+      "trails": {
+        "ru": "Trilho da Pedra Alçada (Сан-Жуан-д'Арга, ~11,5 км, круговой)",
+        "pt": "Trilho da Pedra Alçada (São João d'Arga, ~11,5 km, circular)",
+        "en": "Pedra Alçada Trail (São João d'Arga, ~11.5 km loop)"
+      },
+      "sources": [
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://www.cm-pontedelima.pt/cmpontedelima/uploads/writer_file/document/1271/info_trail_serra_darga.pdf",
+        "https://www.geocaching.com/geocache/GC70KQN_4-trilho-da-pedra-alcada",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Altitude 825 m and 4500 ha from the 2012 Grande Trail press kit (read). Species list and trail length come from a web-search summary of a trekking guide; the PR12 code for this trail appears only on a geocaching page, so it is NOT used - verify with Câmara de Caminha. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "monsanto_lisboa",
+      "names": {
+        "ru": "Лесопарк Монсанту (Лиссабон)",
+        "pt": "Parque Florestal de Monsanto (Lisboa)",
+        "en": "Monsanto Forest Park (Lisbon)"
+      },
+      "lat": 38.7225,
+      "lng": -9.1903,
+      "radiusKm": 4,
+      "elevationM": 179,
+      "region": "AML",
+      "autumnTimingZone": "lowland_coastal",
+      "dominantCategory": "pine",
+      "categories": [
+        "pine",
+        "evergreen_broadleaf"
+      ],
+      "speciesIds": [
+        "pinus_pinea",
+        "quercus_rotundifolia",
+        "quercus_suber"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "Wikipedia / Lifecooler",
+      "summary": {
+        "ru": "Городской лесопарк Лиссабона площадью около 900–1000 га (создан в 1936 г.). Произрастают пиния, каменный и пробковый дубы.",
+        "pt": "Parque florestal urbano de Lisboa com cerca de 900–1000 ha (criado em 1936). Existem pinheiro-manso, azinheira e sobreiro.",
+        "en": "Lisbon's urban forest park of about 900-1000 ha (created 1936). Stone pine, holm oak and cork oak are present."
+      },
+      "trails": {
+        "ru": "",
+        "pt": "",
+        "en": ""
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Monsanto_Forest_Park",
+        "https://lifecooler.com/artigo/atividades/parque-florestal-de-monsanto/306183",
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Marker from Nominatim (38.7226,-9.1903); en.wikipedia gives 38.74,-9.1865. Area differs by source (900 vs 1000 ha). Species per a search summary of tourism/press text (stone and Aleppo pines planted; cork and holm oak planted for education), so present but possibly not dominant. Corredor Verde is a cycle-pedestrian link, not a marked PR; trails empty. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "mata_escaroupim",
+      "names": {
+        "ru": "Национальный лес Эшкаруппим (Салватерра-де-Мажуш)",
+        "pt": "Mata Nacional do Escaroupim (Salvaterra de Magos)",
+        "en": "Escaroupim National Forest (Salvaterra de Magos)"
+      },
+      "lat": 39.0816,
+      "lng": -8.7274,
+      "radiusKm": 4,
+      "elevationM": 29,
+      "region": "Lisboa e Vale do Tejo",
+      "autumnTimingZone": "lowland_coastal",
+      "dominantCategory": "pine",
+      "categories": [
+        "pine"
+      ],
+      "speciesIds": [
+        "pinus_pinea"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "ISA / Time Out",
+      "summary": {
+        "ru": "Сосновый лес на берегу Тежу в Салватерра-де-Мажуш, до 1836 года находившийся в ведении королевской охоты. Исследовательский участок ISA — посадка пинии 1992 года.",
+        "pt": "Pinhal junto ao Tejo em Salvaterra de Magos, gerido até 1836 pela Montaria-Mor do Reino. O ISA estuda aqui um povoamento de pinheiro-manso plantado em 1992.",
+        "en": "Pine forest on the Tagus in Salvaterra de Magos, managed until 1836 by the royal hunting office. ISA runs a trial in a stone-pine stand planted in 1992."
+      },
+      "trails": {
+        "ru": "Pequena Rota da Mata Nacional do Escaroupim (8,5 км, круговой)",
+        "pt": "Pequena Rota da Mata Nacional do Escaroupim (8,5 km, circular)",
+        "en": "Pequena Rota da Mata Nacional do Escaroupim (8.5 km loop)"
+      },
+      "sources": [
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://www.timeout.pt/lisboa/pt/coisas-para-fazer/nomadas-do-rio-a-pe-e-de-barco-pelo-escaroupim",
+        "https://fenix.isa.ulisboa.pt/downloadFile/844497944579135/desbastes_PSoares.pdf",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Time Out page only says 'pinhal'; pinus_pinea comes from the ISA stone-pine thinning trial in this forest (read via search summary). No PR code in sources; no area figure found. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
+    },
+    {
+      "id": "mata_camarido",
+      "names": {
+        "ru": "Национальный лес Камариду (Моледу, Каминья)",
+        "pt": "Mata Nacional do Camarido (Moledo, Caminha)",
+        "en": "Camarido National Forest (Moledo, Caminha)"
+      },
+      "lat": 41.8597,
+      "lng": -8.8609,
+      "radiusKm": 3,
+      "elevationM": 11,
+      "region": "Norte",
+      "autumnTimingZone": "lowland_coastal",
+      "dominantCategory": "pine",
+      "categories": [
+        "pine"
+      ],
+      "speciesIds": [
+        "pinus_pinaster"
+      ],
+      "autumnWalkRating": null,
+      "sourceRef": "ICNF / Wikipedia",
+      "summary": {
+        "ru": "Прибрежный сосновый лес на устье реки Минью около Моледу, защищающий побережье; ICNF проводит здесь контроль инвазивных пород и содействует естественному возобновлению приморской сосны.",
+        "pt": "Pinhal costeiro na foz do Minho, junto a Moledo, que protege a orla costeira; o ICNF faz aqui controlo de espécies invasoras e favorece a regeneração natural do pinheiro-bravo.",
+        "en": "Coastal pine forest at the mouth of the Minho near Moledo that shields the shoreline; ICNF controls invasive woody species and favours natural maritime-pine regeneration."
+      },
+      "trails": {
+        "ru": "",
+        "pt": "",
+        "en": ""
+      },
+      "sources": [
+        "https://nominatim.openstreetmap.org (OpenStreetMap)",
+        "https://bo.agroportal.pt/?p=877832",
+        "https://mare-centre.pt/en/camarinhas_camarido",
+        "https://open-meteo.com/en/docs/elevation-api (Copernicus DEM 90 m)"
+      ],
+      "sourceNotes": "Marker from Nominatim (41.8597,-8.8609). Area quoted as 144-164 ha depending on source (not used). A non-ICNF source also mentions cork oak and laurel; not listed. No marked trail verified. Elevation = Copernicus DEM value at the marker coordinates (Open-Meteo)."
     }
   ],
   "regionalStats": {

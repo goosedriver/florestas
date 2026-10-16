@@ -23,10 +23,10 @@
     lang: 'ru', // Default to Russian as requested
     month: 10,  // October default
     decade: 'mid', // 'early' (1-10), 'mid' (11-20), 'late' (21-31)
-    mode: 'all', // 'all', 'autumn_walk', 'blooming_fruiting'
-    forestType: 'all', // 'all', 'eucalyptus', 'pine', 'deciduous', 'montado', 'orchard_shrub'
+    // Combinable filters: OR inside a group, AND between groups; empty set = no restriction
+    forestTypes: new Set(), // 'eucalyptus', 'pine', 'deciduous', 'montado', 'orchard_shrub'
     specificSpecies: 'all', // 'all' or speciesId (e.g. 'castanea_sativa')
-    phenoState: 'all', // 'all', 'flowering', 'fruiting', 'foliage_yellowing', 'foliage_fallen', 'foliage_green'
+    phenoStates: new Set(), // 'flowering', 'fruiting', 'foliage_yellowing', 'foliage_fallen', 'foliage_green'
     searchQuery: '',
     activeTab: 'locations', // 'locations', 'species', 'stats'
     wmsEnabled: true,
@@ -81,7 +81,7 @@
       forestAll: 'Все типы лесов',
       forestEucalyptus: 'Эвкалипты (845 тыс. га)',
       forestPine: 'Сосновые (890 тыс. га)',
-      forestDeciduous: 'Листопадные дубравы & каштаны',
+      forestDeciduous: 'Листопадные леса (дубы, каштаны, клёны, тополя…)',
       forestMontado: 'Монтадо (пробковый и каменный дуб)',
       forestOrchard: 'Сады (в т.ч. миндаль) & рожковое дерево',
       titlePhenoFilter: 'Фенология & Листва',
@@ -115,7 +115,7 @@
       legendCos: 'Официальные цвета WMS DGT COS 2025 v1',
       legEuc: 'Эвкалипты',
       legPine: 'Сосновые',
-      legDeciduous: 'Листопадные дубы и каштаны',
+      legDeciduous: 'Листопадные леса',
       legMontado: 'Монтадо (пробка / каменный дуб)',
       legOrchard: 'Сады и рожковые рощи',
       legFolYellow: 'Золотая / Желтая листва (Идеально для прогулок)',
@@ -171,7 +171,7 @@
       forestAll: 'Todas as Florestas',
       forestEucalyptus: 'Eucaliptais (845 mil ha)',
       forestPine: 'Pinhais & Resinosas (890 mil ha)',
-      forestDeciduous: 'Folhosas Caducifólias (Carvalhos/Castanheiros)',
+      forestDeciduous: 'Folhosas caducifólias (carvalhos, castanheiros, bordos, choupos…)',
       forestMontado: 'Montado (Sobreiro & Azinheira - 1M ha)',
       forestOrchard: 'Pomares (incl. amendoal) & Alfarrobais',
       titlePhenoFilter: 'Fenologia & Estado das Folhas',
@@ -205,7 +205,7 @@
       legendCos: 'Cores Oficiais WMS DGT COS 2025 v1',
       legEuc: 'Eucaliptais',
       legPine: 'Pinhais & Resinosas',
-      legDeciduous: 'Folhosas Caducifólias (Carvalho/Castanheiro)',
+      legDeciduous: 'Folhosas caducifólias',
       legMontado: 'Montado (Sobreiro/Azinheira)',
       legOrchard: 'Pomares & Alfarrobais',
       legFolYellow: 'Folhas Douradas / Amarelas (Ideal para Passear)',
@@ -261,7 +261,7 @@
       forestAll: 'All Forest Types',
       forestEucalyptus: 'Eucalyptus (845k ha)',
       forestPine: 'Pine & Conifers (890k ha)',
-      forestDeciduous: 'Deciduous Broadleaf (Oaks/Chestnut)',
+      forestDeciduous: 'Deciduous broadleaf (oaks, chestnut, maples, poplars…)',
       forestMontado: 'Montado (Cork & Holm Oak - 1M ha)',
       forestOrchard: 'Orchards (incl. almond) & Carob',
       titlePhenoFilter: 'Phenology & Foliage State',
@@ -295,7 +295,7 @@
       legendCos: 'Official WMS DGT COS 2025 v1 Colors',
       legEuc: 'Eucalyptus',
       legPine: 'Pine & Conifers',
-      legDeciduous: 'Deciduous Broadleaf (Oaks/Chestnut)',
+      legDeciduous: 'Deciduous broadleaf',
       legMontado: 'Montado (Cork & Holm Oak)',
       legOrchard: 'Orchards & Carob',
       legFolYellow: 'Golden / Amber Foliage (Ideal for Walking)',
@@ -352,14 +352,94 @@
   // hedge), not crop types — COS cannot isolate almond or chestnut orchards. Only traditional
   // low-density orchards (2.2.2.1, flagged isForest in cosN4Translations) join the forest view.
   // =========================================================================
-  const FOREST_TYPE_CQL = {
-    all: "cos25v1_n1_c = '5' OR cos25v1_n1_c = '4' OR cos25v1_n4_c = '2.2.2.1'",
-    eucalyptus: "cos25v1_n4_c = '5.1.1.6'",
-    pine: "cos25v1_n4_c IN ('5.1.2.1', '5.1.2.2', '5.1.2.3', '4.1.2.1', '4.1.2.2', '4.2.2.1', '4.2.2.2')",
-    deciduous: "cos25v1_n4_c IN ('5.1.1.3', '5.1.1.4', '5.1.1.8', '4.1.1.3', '4.1.1.4', '4.2.1.3', '4.2.1.4')",
-    montado: "cos25v1_n4_c IN ('5.1.1.1', '5.1.1.2', '4.1.1.1', '4.1.1.2', '4.2.1.1', '4.2.1.2')",
-    orchard_shrub: "cos25v1_n4_c IN ('5.1.1.5', '2.2.2.1', '2.2.2.2', '2.2.2.3')"
+  const FOREST_TYPE_CODES = {
+    eucalyptus: ['5.1.1.6'],
+    pine: ['5.1.2.1', '5.1.2.2', '5.1.2.3', '4.1.2.1', '4.1.2.2', '4.2.2.1', '4.2.2.2'],
+    deciduous: ['5.1.1.3', '5.1.1.4', '5.1.1.8', '4.1.1.3', '4.1.1.4', '4.2.1.3', '4.2.1.4'],
+    montado: ['5.1.1.1', '5.1.1.2', '4.1.1.1', '4.1.1.2', '4.2.1.1', '4.2.1.2'],
+    orchard_shrub: ['5.1.1.5', '2.2.2.1', '2.2.2.2', '2.2.2.3']
   };
+
+  const codesCql = codes => (codes.length ? `cos25v1_n4_c IN ('${codes.join("', '")}')` : "cos25v1_n4_c = 'NONE'");
+
+  const FOREST_TYPE_CQL = {
+    all: "cos25v1_n1_c = '5' OR cos25v1_n1_c = '4' OR cos25v1_n4_c = '2.2.2.1'"
+  };
+  Object.keys(FOREST_TYPE_CODES).forEach(t => { FOREST_TYPE_CQL[t] = codesCql(FOREST_TYPE_CODES[t]); });
+
+  // Quick presets shown as the top tabs; they only set the chips below, visibly
+  const FILTER_PRESETS = {
+    all: { types: [], phenos: [] },
+    autumn_walk: { types: ['deciduous'], phenos: ['foliage_yellowing'] },
+    blooming_fruiting: { types: [], phenos: ['flowering', 'fruiting'] }
+  };
+
+  const FILTER_STRINGS = {
+    ru: {
+      presetAll: 'все леса, без фильтров', presetAutumn: 'лиственные × жёлтая листва', presetBlooming: 'цветение + плоды',
+      hint: 'Можно выбрать несколько. Фильтры из разных блоков сочетаются.',
+      summary: (what, codes, locs) => `На карте: ${what} · ${codes} · мест: ${locs}`,
+      allForests: 'все леса', codesAll: 'все лесные классы COS', codes: n => `классов COS: ${n}`, none: 'нет совпадений',
+      comboTitle: 'Пересечение фильтров',
+      comboDesc: (codes, sp) => `Подсвечены классы COS (${codes}), где оба условия выполняются для видов: ${sp}.`,
+      comboEmpty: 'В выбранный период ни один картируемый вид не подходит под оба условия. Полигоны WMS скрыты, попробуйте другую декаду или ослабьте фильтр.',
+      zone: ' В слое COS нет высот: участок подсвечен, если фаза наступила хотя бы в одной высотной зоне.'
+    },
+    pt: {
+      presetAll: 'todas as florestas, sem filtros', presetAutumn: 'caducifólias × folhas amarelas', presetBlooming: 'floração + fruto',
+      hint: 'Pode escolher vários. Os filtros de blocos diferentes combinam-se.',
+      summary: (what, codes, locs) => `No mapa: ${what} · ${codes} · locais: ${locs}`,
+      allForests: 'todas as florestas', codesAll: 'todas as classes florestais COS', codes: n => `classes COS: ${n}`, none: 'sem resultados',
+      comboTitle: 'Combinação de filtros',
+      comboDesc: (codes, sp) => `Destacadas as classes COS (${codes}) onde ambas as condições se cumprem para: ${sp}.`,
+      comboEmpty: 'Neste período nenhuma espécie cartografável cumpre ambas as condições. Polígonos WMS ocultados; experimente outra década ou alivie o filtro.',
+      zone: ' A COS não inclui altitude: o polígono é destacado se a fase ocorre em pelo menos uma faixa altitudinal.'
+    },
+    en: {
+      presetAll: 'all forests, no filters', presetAutumn: 'deciduous × yellow leaves', presetBlooming: 'blooming + fruit',
+      hint: 'Pick several. Filters from different blocks combine.',
+      summary: (what, codes, locs) => `On the map: ${what} · ${codes} · places: ${locs}`,
+      allForests: 'all forests', codesAll: 'all COS forest classes', codes: n => `COS classes: ${n}`, none: 'no matches',
+      comboTitle: 'Combined filters',
+      comboDesc: (codes, sp) => `Highlighting COS classes (${codes}) where both conditions hold for: ${sp}.`,
+      comboEmpty: 'In this period no mappable species meets both conditions. WMS polygons hidden; try another ten-day period or loosen a filter.',
+      zone: ' COS has no elevation data: a polygon is highlighted if the phase occurs in at least one altitude band.'
+    }
+  };
+
+  function currentPeriodKey() {
+    const decadeNum = state.decade === 'early' ? 1 : state.decade === 'mid' ? 2 : 3;
+    return `${state.month}.${decadeNum}`;
+  }
+
+  // COS codes allowed by the chip filters, or null when no chip restricts the map
+  function getActiveCodeSet() {
+    const periodKey = currentPeriodKey();
+    let typeCodes = null;
+    if (state.forestTypes.size) {
+      typeCodes = new Set();
+      state.forestTypes.forEach(t => (FOREST_TYPE_CODES[t] || []).forEach(c => typeCodes.add(c)));
+    }
+    let phenoCodes = null;
+    if (state.phenoStates.size) {
+      phenoCodes = new Set();
+      state.phenoStates.forEach(p => getMappedPhenoSpecies(p, periodKey).mapped.forEach(sp => sp.dgtCosCodes.forEach(c => phenoCodes.add(c))));
+    }
+    if (!typeCodes && !phenoCodes) return null;
+    if (!typeCodes) return Array.from(phenoCodes);
+    if (!phenoCodes) return Array.from(typeCodes);
+    return Array.from(typeCodes).filter(c => phenoCodes.has(c));
+  }
+
+  // Mappable species that actually drive the highlighted polygons
+  function getSpeciesBehindCodes(codes) {
+    const periodKey = currentPeriodKey();
+    return DATA.species.filter(sp =>
+      DATA.isCosMappable(sp) &&
+      sp.dgtCosCodes.some(c => codes.indexOf(c) !== -1) &&
+      (!state.phenoStates.size || Array.from(state.phenoStates).some(p => speciesMatchesPheno(sp, p, periodKey)))
+    );
+  }
 
   // =========================================================================
   // Seasonal Summary Generator
@@ -445,6 +525,10 @@
   // =========================================================================
   // Helper: Compute Phenology & Autumn State for a Location
   // =========================================================================
+  function foliageEmoji(st) {
+    return st === 'evergreen' ? '🌿 ' : st === 'unknown' ? '❔ ' : '🍂 ';
+  }
+
   function computeLocationStatus(loc, month, decade) {
     const decadeNum = decade === 'early' ? 1 : decade === 'mid' ? 2 : 3;
     const periodKey = `${month}.${decadeNum}`;
@@ -466,6 +550,16 @@
       color: '#2d6a4f',
       label: { ru: 'Вечнозеленый', pt: 'Perenifólio', en: 'Evergreen' }
     };
+
+    // A place whose tree species are not documented must not claim to be evergreen
+    if (locSpecies.length === 0) {
+      dominantFoliage = {
+        status: 'unknown',
+        color: '#64748b',
+        statuses: [],
+        label: { ru: 'Нет данных о породах', pt: 'Sem dados de espécies', en: 'No species data' }
+      };
+    }
 
     if (deciduousSpecies.length > 0) {
       let highestRank = 0;
@@ -516,45 +610,9 @@
       }
     }
 
-    // 2. If a phenology state is chosen
-    if (state.phenoState !== 'all') {
-      const decadeNum = state.decade === 'early' ? 1 : state.decade === 'mid' ? 2 : 3;
-      const periodKey = `${state.month}.${decadeNum}`;
-      const matchingCodes = new Set();
-
-      getMappedPhenoSpecies(state.phenoState, periodKey).mapped.forEach(sp => {
-        sp.dgtCosCodes.forEach(code => matchingCodes.add(code));
-      });
-
-      if (matchingCodes.size > 0) {
-        return `cos25v1_n4_c IN ('${Array.from(matchingCodes).join("', '")}')`;
-      } else {
-        return "cos25v1_n4_c = 'NONE'";
-      }
-    }
-
-    // 3. If quick mode is active
-    if (state.mode === 'autumn_walk') {
-      return FOREST_TYPE_CQL.deciduous;
-    } else if (state.mode === 'blooming_fruiting') {
-      const activeCodes = new Set();
-      DATA.species.forEach(sp => {
-        const isFl = sp.phenology.floweringMonths.indexOf(state.month) !== -1;
-        const isFr = sp.phenology.fruitingMonths.indexOf(state.month) !== -1;
-        if ((isFl || isFr) && DATA.isCosMappable(sp)) {
-          sp.dgtCosCodes.forEach(c => activeCodes.add(c));
-        }
-      });
-      if (activeCodes.size > 0) {
-        return `cos25v1_n4_c IN ('${Array.from(activeCodes).join("', '")}')`;
-      }
-      return "cos25v1_n4_c = 'NONE'";
-    }
-
-    // 4. Forest type filter
-    if (state.forestType !== 'all') {
-      return FOREST_TYPE_CQL[state.forestType] || FOREST_TYPE_CQL.all;
-    }
+    // 2. Chip filters (forest types × phenology), intersected at COS-code level
+    const codes = getActiveCodeSet();
+    if (codes) return codesCql(codes);
 
     // 5. Default "all": Show ALL forests, montados and orchards (hide cities/roads)
     return FOREST_TYPE_CQL.all;
@@ -605,6 +663,14 @@
     };
   }
 
+  function matchAnyForestType(cats, dominantCat) {
+    return !state.forestTypes.size || Array.from(state.forestTypes).some(t => matchForestType(cats, dominantCat, t));
+  }
+
+  function matchAnyPhenology(statusObj) {
+    return !state.phenoStates.size || Array.from(state.phenoStates).some(p => matchPhenology(statusObj, p));
+  }
+
   function matchPhenology(statusObj, filterPheno) {
     if (filterPheno === 'all') return true;
     if (filterPheno === 'flowering') return statusObj.isFlowering;
@@ -630,23 +696,14 @@
       }
 
       // Forest type filter
-      if (!matchForestType(loc.categories, loc.dominantCategory, state.forestType)) {
+      if (!matchAnyForestType(loc.categories, loc.dominantCategory)) {
         return false;
       }
 
       // Phenology filter
       const status = computeLocationStatus(loc, state.month, state.decade);
-      if (!matchPhenology(status, state.phenoState)) {
+      if (!matchAnyPhenology(status)) {
         return false;
-      }
-
-      // Quick mode
-      if (state.mode === 'autumn_walk') {
-        const isDeciduous = (loc.categories || []).indexOf('deciduous') !== -1 || loc.dominantCategory === 'deciduous';
-        const hasGoodRating = loc.autumnWalkRating && loc.autumnWalkRating >= 3;
-        if (!isDeciduous && !hasGoodRating) return false;
-      } else if (state.mode === 'blooming_fruiting') {
-        if (!status.isFlowering && !status.isFruiting) return false;
       }
 
       // Search query
@@ -682,7 +739,8 @@
 
       return true;
     }).sort((a, b) => {
-      if (state.mode === 'autumn_walk') {
+      // Golden-foliage filter: most colourful and best-rated walks first
+      if (state.phenoStates.has('foliage_yellowing')) {
         const stA = computeLocationStatus(a, state.month, state.decade).foliage.status;
         const stB = computeLocationStatus(b, state.month, state.decade).foliage.status;
         const priority = { peak_yellow: 3, yellowing: 2, falling: 1, fallen: 0, green: -1, evergreen: -2 };
@@ -704,24 +762,14 @@
         return false;
       }
 
-      if (state.forestType !== 'all') {
-        if (!matchForestType(sp.category, null, state.forestType)) {
-          return false;
-        }
-      }
+      if (!matchAnyForestType(sp.category, null)) return false;
 
       const isFlowering = sp.phenology.floweringMonths.indexOf(state.month) !== -1;
       const isFruiting = sp.phenology.fruitingMonths.indexOf(state.month) !== -1;
 
       const phenoObj = { isFlowering, isFruiting, foliage: DATA.getNationalAutumnStatus(sp, periodKey) };
-      if (!matchPhenology(phenoObj, state.phenoState)) {
+      if (!matchAnyPhenology(phenoObj)) {
         return false;
-      }
-
-      if (state.mode === 'autumn_walk') {
-        if (sp.leafType !== 'deciduous') return false;
-      } else if (state.mode === 'blooming_fruiting') {
-        if (!isFlowering && !isFruiting) return false;
       }
 
       if (q) {
@@ -1195,7 +1243,7 @@
           <h4 class="custom-popup-title">${fullTitle}</h4>
           <p class="custom-popup-sub">${loc.region} • ${loc.elevationM}m ${walkScore ? '• ' + walkScore : ''}</p>
           <div style="margin: 6px 0; font-size: 0.76rem; color: #d8f3dc;">
-            <strong>${status.foliage.status !== 'evergreen' ? '🍂 ' : '🌿 '}${foliageLbl}</strong>
+            <strong>${foliageEmoji(status.foliage.status)}${foliageLbl}</strong>
             ${status.isFlowering ? '<br>🌸 ' + (state.lang === 'ru' ? 'Идет цветение: ' : 'Floração: ') + status.floweringSpecies.map(s => s.names[state.lang] || s.names.pt).join(', ') : ''}
             ${status.isFruiting ? '<br>🌰 ' + (state.lang === 'ru' ? 'Спелые плоды: ' : 'Fruto: ') + status.fruitingSpecies.map(s => s.names[state.lang] || s.names.pt).join(', ') : ''}
           </div>
@@ -1437,7 +1485,7 @@
             ${walkScore ? `<span class="tag-badge badge-yellowing" title="${UI_STRINGS[state.lang].walkScore}">${walkScore}</span>` : ''}
           </div>
           <div class="location-tags-row">
-            <span class="tag-badge ${foliageClass}">${status.foliage.status !== 'evergreen' ? '🍂 ' : '🌿 '}${status.foliage.label[state.lang]}</span>
+            <span class="tag-badge ${foliageClass}">${foliageEmoji(status.foliage.status)}${status.foliage.label[state.lang]}</span>
             ${status.isFlowering ? `<span class="tag-badge badge-flowering">🌸 ${state.lang === 'ru' ? 'Цветет' : 'Floração'}</span>` : ''}
             ${status.isFruiting ? `<span class="tag-badge badge-fruiting">🌰 ${state.lang === 'ru' ? 'Плодоносит' : 'Frutificação'}</span>` : ''}
           </div>
@@ -1583,17 +1631,85 @@
     `;
   }
 
+  function activePresetKey() {
+    const same = (set, arr) => set.size === arr.length && arr.every(x => set.has(x));
+    if (state.specificSpecies !== 'all') return null;
+    return Object.keys(FILTER_PRESETS).find(k => same(state.forestTypes, FILTER_PRESETS[k].types) && same(state.phenoStates, FILTER_PRESETS[k].phenos)) || null;
+  }
+
+  function syncFilterButtons(flash) {
+    document.querySelectorAll('#filter-forest-type .forest-filter-btn').forEach(b => {
+      const t = b.getAttribute('data-type');
+      const on = t === 'all' ? state.forestTypes.size === 0 : state.forestTypes.has(t);
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (flash && on && t !== 'all') { b.classList.remove('chip-flash'); void b.offsetWidth; b.classList.add('chip-flash'); }
+    });
+    document.querySelectorAll('#filter-phenology .pheno-filter-btn').forEach(b => {
+      const p = b.getAttribute('data-pheno');
+      const on = p === 'all' ? state.phenoStates.size === 0 : state.phenoStates.has(p);
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (flash && on && p !== 'all') { b.classList.remove('chip-flash'); void b.offsetWidth; b.classList.add('chip-flash'); }
+    });
+    const preset = activePresetKey();
+    document.querySelectorAll('.mode-tab').forEach(t => {
+      const on = t.getAttribute('data-mode') === preset;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+  }
+
+  function applyFilters(opts) {
+    syncFilterButtons(opts && opts.flash);
+    updateWmsLayer();
+    renderActivePhenomenonCard();
+    renderQuickSpeciesPills();
+    renderLocationMarkers();
+    renderSpeciesList(getFilteredSpecies());
+  }
+
+  function chipLabel(selector) {
+    const el = document.querySelector(selector + ' .pill-name');
+    // Drop explanatory parentheses: 'жёлтые листья (пик для прогулок)' → 'жёлтые листья'
+    return el ? el.textContent.replace(/\s*\([^)]*\)/g, '').trim().toLowerCase() : '';
+  }
+
+  // One-line "what is on the map" summary under the filter cards
+  function updateFilterSummary() {
+    const el = document.getElementById('filter-summary');
+    if (!el) return;
+    const fs = FILTER_STRINGS[state.lang] || FILTER_STRINGS.pt;
+    const parts = [];
+    if (state.specificSpecies !== 'all') {
+      const sp = DATA.getSpeciesById(state.specificSpecies);
+      if (sp) parts.push(sp.names[state.lang] || sp.names.pt);
+    } else {
+      if (state.forestTypes.size) parts.push(Array.from(state.forestTypes).map(t => chipLabel(`#filter-forest-type [data-type="${t}"]`)).join(' / '));
+      if (state.phenoStates.size) parts.push(Array.from(state.phenoStates).map(p => chipLabel(`#filter-phenology [data-pheno="${p}"]`)).join(' / '));
+    }
+    const codes = state.specificSpecies !== 'all' ? null : getActiveCodeSet();
+    const codesTxt = codes === null ? (state.specificSpecies !== 'all' ? fs.codes((DATA.getSpeciesById(state.specificSpecies) || {}).dgtCosCodes ? DATA.getSpeciesById(state.specificSpecies).dgtCosCodes.length : 0) : fs.codesAll)
+      : codes.length ? fs.codes(codes.length) : fs.none;
+    el.textContent = fs.summary(parts.length ? parts.join(' × ') : fs.allForests, codesTxt, getFilteredLocations().length);
+    el.classList.toggle('summary-empty', codes !== null && codes.length === 0);
+  }
+
+  function updatePresetHints() {
+    const fs = FILTER_STRINGS[state.lang] || FILTER_STRINGS.pt;
+    [['txt-mode-all-sub', fs.presetAll], ['txt-mode-autumn-sub', fs.presetAutumn], ['txt-mode-blooming-sub', fs.presetBlooming], ['txt-filter-hint', fs.hint]]
+      .forEach(([id, txt]) => { const e = document.getElementById(id); if (e) e.textContent = txt; });
+  }
+
   function filterBySpecies(spId) {
     state.specificSpecies = spId;
 
+    // A single species overrides the chip filters
     if (spId !== 'all') {
-      state.forestType = 'all';
-      document.querySelectorAll('.forest-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-type') === 'all'));
-      state.phenoState = 'all';
-      document.querySelectorAll('.pheno-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-pheno') === 'all'));
-      state.mode = 'all';
-      document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b.getAttribute('data-mode') === 'all'));
+      state.forestTypes = new Set();
+      state.phenoStates = new Set();
     }
+    syncFilterButtons();
 
     // Update select dropdown value
     const sel = document.getElementById('select-specific-species');
@@ -1610,14 +1726,10 @@
   }
 
   function resetAllFilters() {
-    state.forestType = 'all';
-    state.phenoState = 'all';
+    state.forestTypes = new Set();
+    state.phenoStates = new Set();
     state.specificSpecies = 'all';
-    state.mode = 'all';
-
-    document.querySelectorAll('.forest-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-type') === 'all'));
-    document.querySelectorAll('.pheno-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-pheno') === 'all'));
-    document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b.getAttribute('data-mode') === 'all'));
+    syncFilterButtons();
 
     const sel = document.getElementById('select-specific-species');
     if (sel) sel.value = 'all';
@@ -1650,30 +1762,33 @@
     document.getElementById('detail-category').textContent =
       UI_STRINGS[state.lang]['forest' + (loc.dominantCategory.charAt(0).toUpperCase() + loc.dominantCategory.slice(1))] || loc.dominantCategory;
     document.getElementById('detail-foliage-status').textContent =
-      `${status.foliage.status !== 'evergreen' ? '🍂 ' : '🌿 '}${status.foliage.label[state.lang]}`;
+      `${foliageEmoji(status.foliage.status)}${status.foliage.label[state.lang]}`;
 
     document.getElementById('detail-box-foliage').textContent = status.foliage.label[state.lang];
     document.getElementById('detail-box-flowering').textContent =
       status.isFlowering
         ? status.floweringSpecies.map(s => s.names[state.lang] || s.names.pt).join(', ')
-        : (state.lang === 'ru' ? 'Нет активного цветения' : 'Sem floração nesta época');
+        : (state.lang === 'ru' ? 'Нет активного цветения' : state.lang === 'pt' ? 'Sem floração nesta época' : 'Nothing flowering now');
     document.getElementById('detail-box-fruiting').textContent =
       status.isFruiting
         ? status.fruitingSpecies.map(s => s.names[state.lang] || s.names.pt).join(', ')
-        : (state.lang === 'ru' ? 'Период покоя семян' : 'Sem maturação nesta época');
+        : (state.lang === 'ru' ? 'Период покоя семян' : state.lang === 'pt' ? 'Sem maturação nesta época' : 'No ripe fruit now');
 
     renderPhenologyCalendar(loc, null);
 
     const trailsContainer = document.getElementById('detail-trails-list');
     if (trailsContainer) {
       const trailName = loc.trails[state.lang] || loc.trails.pt;
-      trailsContainer.innerHTML = `
+      // Places without an officially marked trail say so instead of showing an empty card
+      trailsContainer.innerHTML = !trailName
+        ? `<p class="trail-meta">${state.lang === 'ru' ? 'Официальная маркированная тропа не найдена в источниках.' : state.lang === 'pt' ? 'Sem percurso pedestre homologado identificado nas fontes.' : 'No officially marked trail found in the sources.'}</p>`
+        : `
         <div class="trail-item">
           <div class="trail-info">
             <span class="trail-title">🥾 ${trailName}</span>
             <span class="trail-meta">${UI_STRINGS[state.lang].routePR} • ${loc.elevationM}m • ${loc.region}</span>
           </div>
-          <span class="trail-badge-autumn">⭐ ${loc.autumnWalkRating || 5}/5</span>
+          ${loc.autumnWalkRating ? `<span class="trail-badge-autumn">⭐ ${loc.autumnWalkRating}/5</span>` : ''}
         </div>
       `;
     }
@@ -1889,6 +2004,11 @@
     const lang = state.lang || 'ru';
     const decadeNum = state.decade === 'early' ? 1 : state.decade === 'mid' ? 2 : 3;
     const periodKey = `${state.month}.${decadeNum}`;
+    // Single-chip selections keep their detailed texts; anything else is a combination
+    const singlePheno = state.phenoStates.size === 1 && !state.forestTypes.size ? Array.from(state.phenoStates)[0] : 'all';
+    const singleType = state.forestTypes.size === 1 && !state.phenoStates.size ? Array.from(state.forestTypes)[0] : 'all';
+    const isCombo = (state.forestTypes.size || state.phenoStates.size) && singlePheno === 'all' && singleType === 'all';
+    updateFilterSummary();
 
     if (state.specificSpecies !== 'all') {
       hasFilter = true;
@@ -1917,9 +2037,27 @@
             : `Displaying only official DGT COS parcels (${codesStr}) for this tree species.`;
         }
       }
-    } else if (state.phenoState !== 'all') {
+    } else if (isCombo) {
       hasFilter = true;
-      const ph = getMappedPhenoSpecies(state.phenoState, periodKey);
+      const fs = FILTER_STRINGS[lang] || FILTER_STRINGS.pt;
+      const codes = getActiveCodeSet() || [];
+      const names = [];
+      if (state.forestTypes.size) names.push(Array.from(state.forestTypes).map(t => chipLabel(`#filter-forest-type [data-type="${t}"]`)).join(' / '));
+      if (state.phenoStates.size) names.push(Array.from(state.phenoStates).map(p => chipLabel(`#filter-phenology [data-pheno="${p}"]`)).join(' / '));
+      icon = state.phenoStates.has('foliage_fallen') ? '🪵' : state.phenoStates.has('foliage_yellowing') ? '🍂' : state.phenoStates.has('flowering') ? '🌸' : '🔎';
+      title = `${fs.comboTitle}: ${names.join(' × ')}`;
+      badge = codes.length ? `COS ${codes.length}` : 'COS 0';
+      if (codes.length) {
+        const spNames = getSpeciesBehindCodes(codes).map(sp => sp.names[lang] || sp.names.pt).join(', ');
+        const foliage = ['foliage_yellowing', 'foliage_fallen', 'foliage_green'].some(p => state.phenoStates.has(p));
+        desc = fs.comboDesc(codes.join(', '), spNames) + (foliage ? fs.zone : '');
+      } else {
+        banner.classList.add('warning-mode');
+        desc = fs.comboEmpty;
+      }
+    } else if (singlePheno !== 'all') {
+      hasFilter = true;
+      const ph = getMappedPhenoSpecies(singlePheno, periodKey);
       const names = list => list.map(s => s.names[lang] || s.names.pt).join(', ');
       const spNames = names(ph.mapped);
       const count = ph.all.length;
@@ -1937,7 +2075,7 @@
       const hiddenNote = lang === 'ru' ? ' Полигоны WMS скрыты.' : lang === 'pt' ? ' Polígonos WMS ocultados.' : ' WMS polygons are hidden.';
       if (ph.mapped.length === 0) banner.classList.add('warning-mode');
 
-      if (state.phenoState === 'foliage_yellowing') {
+      if (singlePheno === 'foliage_yellowing') {
         icon = '🍂';
         badge = lang === 'ru' ? 'Золотая осень' : lang === 'pt' ? 'Pico Dourado' : 'Golden Peak';
         if (lang === 'ru') {
@@ -1957,7 +2095,7 @@
             : `No mappable species is yellowing in any altitude band during this period.${hiddenNote}`;
         }
         desc += unmappedNote;
-      } else if (state.phenoState === 'foliage_fallen') {
+      } else if (singlePheno === 'foliage_fallen') {
         icon = '🪵';
         badge = lang === 'ru' ? 'Зимний покой' : lang === 'pt' ? 'Folhas Caídas' : 'Fallen Leaves';
         if (ph.mapped.length === 0) {
@@ -1982,7 +2120,7 @@
           desc = `Highlighting stands with active leaf drop or bare branches: ${spNames}.${zoneNote}`;
         }
         desc += unmappedNote;
-      } else if (state.phenoState === 'flowering') {
+      } else if (singlePheno === 'flowering') {
         icon = '🌸';
         badge = lang === 'ru' ? 'Цветение' : lang === 'pt' ? 'Floração' : 'Blooming';
         if (lang === 'ru') {
@@ -1996,7 +2134,7 @@
           desc = ph.mapped.length > 0 ? `Highlighting stands with actively blooming species (${spNames}).` : `No mappable species in bloom.${hiddenNote}`;
         }
         desc += unmappedNote;
-      } else if (state.phenoState === 'fruiting') {
+      } else if (singlePheno === 'fruiting') {
         icon = '🌰';
         badge = lang === 'ru' ? 'Спелые плоды' : lang === 'pt' ? 'Frutificação' : 'Fruiting';
         if (lang === 'ru') {
@@ -2010,7 +2148,7 @@
           desc = ph.mapped.length > 0 ? `Highlighting forests with ripe fruit (${spNames}).` : `No mappable species with ripe fruit.${hiddenNote}`;
         }
         desc += unmappedNote;
-      } else if (state.phenoState === 'foliage_green') {
+      } else if (singlePheno === 'foliage_green') {
         icon = '🌿';
         badge = lang === 'ru' ? 'Зелёная крона' : lang === 'pt' ? 'Copa Verde' : 'Green Canopy';
         if (lang === 'ru') {
@@ -2024,23 +2162,9 @@
           desc = `Highlighting pines, eucalyptus, evergreen oaks and deciduous stands still green in at least one altitude band (${spNames}).`;
         }
       }
-    } else if (state.mode === 'autumn_walk') {
+    } else if (singleType !== 'all') {
       hasFilter = true;
-      icon = '🍂';
-      badge = lang === 'ru' ? 'Осенний маршрут' : lang === 'pt' ? 'Trilho de Outono' : 'Autumn Trail';
-      if (lang === 'ru') {
-        title = 'Листопадные широколиственные леса';
-        desc = 'Подсвечены дубравы и каштановые рощи с высшим рейтингом пеших прогулок.';
-      } else if (lang === 'pt') {
-        title = 'Folhosas caducifólias para passeios';
-        desc = 'Destacados carvalhais e soutos com melhor classificação para trilhos pedestres de outono.';
-      } else {
-        title = 'Deciduous broadleaf forests for walking';
-        desc = 'Highlighting sweet chestnut and oak groves with top ratings for autumn hikes.';
-      }
-    } else if (state.forestType !== 'all') {
-      hasFilter = true;
-      if (state.forestType === 'eucalyptus') {
+      if (singleType === 'eucalyptus') {
         icon = '🍃';
         badge = 'COS 5.1.1.6';
         if (lang === 'ru') {
@@ -2053,7 +2177,7 @@
           title = 'Eucalyptus forests (845k ha)';
           desc = 'Mainland Portugal Eucalyptus globulus cover under official DGT COS code 5.1.1.6.';
         }
-      } else if (state.forestType === 'pine') {
+      } else if (singleType === 'pine') {
         icon = '🌲';
         badge = 'COS 5.1.2.x / 4.x';
         if (lang === 'ru') {
@@ -2066,20 +2190,20 @@
           title = 'Pine and coniferous forests (890k ha)';
           desc = 'Maritime pine and stone pine stands (DGT codes 5.1.2.1–5.1.2.3, 4.x).';
         }
-      } else if (state.forestType === 'deciduous') {
+      } else if (singleType === 'deciduous') {
         icon = '🍂';
-        badge = 'COS 5.1.1.3 / 5.1.1.4';
+        badge = 'COS 5.1.1.3 / .4 / .8';
         if (lang === 'ru') {
           title = 'Листопадные широколиственные леса';
-          desc = 'Дубравы (Quercus pyrenaica, robur) и каштановые рощи (Castanea sativa). Главные локации осенней листвы.';
+          desc = 'Дубравы (5.1.1.3), каштановые рощи (5.1.1.4) и «прочие широколиственные» (5.1.1.8): клёны, тополя, ясени, ольха, берёза, бук, а также их агролесоводческие варианты. COS не выделяет клёны отдельно.';
         } else if (lang === 'pt') {
-          title = 'Folhosas caducifólias (Carvalhais e Soutos)';
-          desc = 'Povoamentos de carvalho-negral, alvarinho e castanheiro (códigos DGT 5.1.1.3, 5.1.1.4).';
+          title = 'Folhosas caducifólias';
+          desc = 'Carvalhais (5.1.1.3), soutos (5.1.1.4) e «outras folhosas» (5.1.1.8): bordos, choupos, freixos, amieiros, vidoeiros, faias, e os respetivos sistemas agroflorestais. A COS não separa os bordos.';
         } else {
           title = 'Deciduous broadleaved forests';
-          desc = 'Pyrenean oak, pedunculate oak, and sweet chestnut stands (DGT 5.1.1.3, 5.1.1.4).';
+          desc = 'Oak woods (5.1.1.3), chestnut groves (5.1.1.4) and "other broadleaves" (5.1.1.8): maples, poplars, ash, alder, birch, beech, plus their agroforestry variants. COS does not map maples separately.';
         }
-      } else if (state.forestType === 'montado') {
+      } else if (singleType === 'montado') {
         icon = '🌳';
         badge = 'COS 5.1.1.1 / 5.1.1.2';
         if (lang === 'ru') {
@@ -2092,7 +2216,7 @@
           title = 'Cork & holm oak montado (>1M ha)';
           desc = 'Iconic Iberian agroforestry system of Alentejo and Algarve (DGT 5.1.1.1, 5.1.1.2).';
         }
-      } else if (state.forestType === 'orchard_shrub') {
+      } else if (singleType === 'orchard_shrub') {
         icon = '🌸';
         badge = 'COS 2.2.2.x / 5.1.1.5';
         if (lang === 'ru') {
@@ -2193,6 +2317,7 @@
     if (txtModeAll) txtModeAll.textContent = s.modeAll;
     if (txtModeAutumn) txtModeAutumn.textContent = s.modeAutumn;
     if (txtModeBlooming) txtModeBlooming.textContent = s.modeBlooming;
+    updatePresetHints();
 
     const titleForestType = document.getElementById('txt-title-forest-type');
     if (titleForestType) titleForestType.textContent = s.titleForestType;
@@ -3541,7 +3666,7 @@
 
     // Picking a filter on a phone should show its effect on the map right away
     sidebar.addEventListener('click', e => {
-      if (e.target.closest('.forest-filter-btn, .pheno-filter-btn, .mode-tab, .active-species-pill, .species-pill-chip') && !e.target.closest('#minerals-panel')) {
+      if (e.target.closest('.mode-tab, .active-species-pill, .species-pill-chip') && !e.target.closest('#minerals-panel')) {
         setTimeout(collapseSheetOnMobile, 150);
       }
     });
@@ -3634,98 +3759,45 @@
       });
     }
 
-    // Exploration Mode Tabs
+    // Preset tabs: set the chips below (visibly) instead of hidden modes
     document.querySelectorAll('.mode-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-
-        const mode = tab.getAttribute('data-mode');
-        state.mode = mode;
+        const preset = FILTER_PRESETS[tab.getAttribute('data-mode')];
+        if (!preset) return;
+        state.forestTypes = new Set(preset.types);
+        state.phenoStates = new Set(preset.phenos);
         state.specificSpecies = 'all';
         const sel = document.getElementById('select-specific-species');
         if (sel) sel.value = 'all';
-
-        if (mode === 'all') {
-          state.forestType = 'all';
-          state.phenoState = 'all';
-          document.querySelectorAll('.forest-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-type') === 'all'));
-          document.querySelectorAll('.pheno-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-pheno') === 'all'));
-        } else if (mode === 'autumn_walk') {
-          state.forestType = 'deciduous';
-          state.phenoState = 'all';
-          document.querySelectorAll('.forest-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-type') === 'deciduous'));
-          document.querySelectorAll('.pheno-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-pheno') === 'all'));
-        } else if (mode === 'blooming_fruiting') {
-          state.forestType = 'all';
-          state.phenoState = 'all';
-          document.querySelectorAll('.forest-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-type') === 'all'));
-          document.querySelectorAll('.pheno-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-pheno') === 'all'));
-        }
-
-        updateWmsLayer();
-        renderActivePhenomenonCard();
-        renderQuickSpeciesPills();
-        renderLocationMarkers();
-        renderSpeciesList(getFilteredSpecies());
+        applyFilters({ flash: true });
       });
     });
 
-    // Forest Type Filters (with mutual reset of phenology & species)
-    document.querySelectorAll('.forest-filter-btn').forEach(btn => {
+    // Forest type chips (multi-select, combine with phenology)
+    document.querySelectorAll('#filter-forest-type .forest-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const type = btn.getAttribute('data-type');
-        document.querySelectorAll('.forest-filter-btn').forEach(b => b.classList.toggle('active', b === btn));
-
-        state.forestType = type;
-
-        // Mutual reset: clear phenology, specific species, and mode
-        if (type !== 'all') {
-          state.phenoState = 'all';
-          document.querySelectorAll('.pheno-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-pheno') === 'all'));
-          state.specificSpecies = 'all';
-          const sel = document.getElementById('select-specific-species');
-          if (sel) sel.value = 'all';
-          state.mode = 'all';
-          document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b.getAttribute('data-mode') === 'all'));
-        }
-
-        // Sychronize WMS CQL automatically on map!
-        updateWmsLayer();
-
-        renderActivePhenomenonCard();
-        renderQuickSpeciesPills();
-        renderLocationMarkers();
-        renderSpeciesList(getFilteredSpecies());
+        if (type === 'all') state.forestTypes = new Set();
+        else if (state.forestTypes.has(type)) state.forestTypes.delete(type);
+        else state.forestTypes.add(type);
+        state.specificSpecies = 'all';
+        const sel = document.getElementById('select-specific-species');
+        if (sel) sel.value = 'all';
+        applyFilters();
       });
     });
 
-    // Phenology Filters (with mutual reset of forest type & species)
-    document.querySelectorAll('.pheno-filter-btn').forEach(btn => {
+    // Phenology chips (multi-select, combine with forest type)
+    document.querySelectorAll('#filter-phenology .pheno-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const pheno = btn.getAttribute('data-pheno');
-        document.querySelectorAll('.pheno-filter-btn').forEach(b => b.classList.toggle('active', b === btn));
-
-        state.phenoState = pheno;
-
-        // Mutual reset: clear forest type, specific species, and mode
-        if (pheno !== 'all') {
-          state.forestType = 'all';
-          document.querySelectorAll('.forest-filter-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-type') === 'all'));
-          state.specificSpecies = 'all';
-          const sel = document.getElementById('select-specific-species');
-          if (sel) sel.value = 'all';
-          state.mode = 'all';
-          document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b.getAttribute('data-mode') === 'all'));
-        }
-
-        // Sychronize WMS CQL automatically on map!
-        updateWmsLayer();
-
-        renderActivePhenomenonCard();
-        renderQuickSpeciesPills();
-        renderLocationMarkers();
-        renderSpeciesList(getFilteredSpecies());
+        if (pheno === 'all') state.phenoStates = new Set();
+        else if (state.phenoStates.has(pheno)) state.phenoStates.delete(pheno);
+        else state.phenoStates.add(pheno);
+        state.specificSpecies = 'all';
+        const sel = document.getElementById('select-specific-species');
+        if (sel) sel.value = 'all';
+        applyFilters();
       });
     });
 
@@ -3964,6 +4036,7 @@
     bindMineralsEvents();
     updateLanguage(state.lang);
     updateMineralsLanguage();
+    syncFilterButtons();
     measureSheetPeek();
   }
 

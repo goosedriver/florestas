@@ -212,14 +212,17 @@
             <button class="mode-tab active" data-mode="all" role="tab" aria-selected="true" id="tab-mode-all">
               <span class="mode-emoji">🌲</span>
               <span class="mode-label" id="txt-mode-all">Visão Geral</span>
+              <span class="mode-sub" id="txt-mode-all-sub"></span>
             </button>
             <button class="mode-tab" data-mode="autumn_walk" role="tab" aria-selected="false" id="tab-mode-autumn">
               <span class="mode-emoji">🍂</span>
               <span class="mode-label" id="txt-mode-autumn">Trilhos de Outono</span>
+              <span class="mode-sub" id="txt-mode-autumn-sub"></span>
             </button>
             <button class="mode-tab" data-mode="blooming_fruiting" role="tab" aria-selected="false" id="tab-mode-blooming">
               <span class="mode-emoji">🌸🌰</span>
               <span class="mode-label" id="txt-mode-blooming">Flor & Fruto</span>
+              <span class="mode-sub" id="txt-mode-blooming-sub"></span>
             </button>
           </div>
         </section>
@@ -231,6 +234,7 @@
             <span class="section-tag" id="tag-icnf-cos">DGT COS / ICNF</span>
           </div>
 
+          <p class="filter-hint" id="txt-filter-hint"></p>
           <div class="pills-grid" id="filter-forest-type" role="group" aria-label="Filtrar por tipo florestal">
             <button class="forest-filter-btn active" data-type="all" id="btn-forest-all">
               <span class="color-dot" style="background:#52b788"></span>
@@ -246,7 +250,7 @@
             </button>
             <button class="forest-filter-btn" data-type="deciduous" id="btn-forest-deciduous">
               <span class="color-dot" style="background:#d97706"></span>
-              <span class="pill-name" id="txt-forest-deciduous">Folhosas Caducifólias (Carvalhais/Castanheiros)</span>
+              <span class="pill-name" id="txt-forest-deciduous">Folhosas caducifólias (carvalhos, castanheiros, bordos, choupos…)</span>
             </button>
             <button class="forest-filter-btn" data-type="montado" id="btn-forest-montado">
               <span class="color-dot" style="background:#15803d"></span>
@@ -292,6 +296,7 @@
               <span class="pill-name" id="txt-pheno-green">Copa Verde / Perenifólia</span>
             </button>
           </div>
+          <p class="filter-summary" id="filter-summary" role="status" aria-live="polite"></p>
         </section>
 
         <!-- Active Phenomenon Breakdown Card (What is Blooming, Fruiting, Yellowing right now) -->
@@ -519,7 +524,7 @@
             <div class="legend-grid" id="legend-forest-types-items">
               <div class="legend-item"><span class="marker-swatch color-eucalyptus"></span><span id="leg-euc">Eucaliptais</span></div>
               <div class="legend-item"><span class="marker-swatch color-pine"></span><span id="leg-pine">Pinhais & Resinosas</span></div>
-              <div class="legend-item"><span class="marker-swatch color-deciduous"></span><span id="leg-deciduous">Folhosas Caducifólias (Carvalho/Castanheiro)</span></div>
+              <div class="legend-item"><span class="marker-swatch color-deciduous"></span><span id="leg-deciduous">Folhosas caducifólias</span></div>
               <div class="legend-item"><span class="marker-swatch color-montado"></span><span id="leg-montado">Montado (Sobreiro/Azinheira)</span></div>
               <div class="legend-item"><span class="marker-swatch color-orchard"></span><span id="leg-orchard">Pomares &amp; Alfarrobais</span></div>
             </div>
