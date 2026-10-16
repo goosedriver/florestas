@@ -1407,6 +1407,8 @@ input:checked + .slider-round:before {
 
 .inspector-actions {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: flex-end;
   margin-top: 0.2rem;
 }
@@ -1953,6 +1955,22 @@ input:checked + .slider-round:before {
   margin-bottom: 6px;
 }
 
+.popup-gmaps-link {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #5eead4;
+  text-decoration: none;
+}
+
+a.btn-sm {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .custom-popup-btn {
   margin-top: 6px;
   display: block;
@@ -2487,6 +2505,37 @@ input:checked + .slider-round:before {
 
 .min-layer-btn:not(.active) {
   opacity: 0.55;
+}
+
+.min-area-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.min-area-actions .btn-pill-action.active {
+  border-color: var(--color-forest-400);
+  color: #fff;
+}
+
+.area-swatch {
+  width: 14px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  opacity: 0.85;
+  box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, 0.35);
+}
+
+.min-area-btn:not(.active) {
+  opacity: 0.5;
+}
+
+.geo-pop-note {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
 
 .min-search-wrap {

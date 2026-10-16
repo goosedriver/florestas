@@ -39,7 +39,8 @@
     inspectedParcel: null,
     mapMode: 'forests', // 'forests' or 'minerals'
     minerals: {
-      layers: { minerals: true, cave: true, mine: true, mine_abandoned: true },
+      layers: { minerals: true, cave: true, cave_mce: true, mine: true, mine_abandoned: true },
+      areaGroups: null, // null = all LNEG potential-area groups visible; otherwise a Set of group keys
       group: 'all',
       substance: 'all',
       sort: 'name',
@@ -897,6 +898,22 @@
   // =========================================================================
   // DGT COS Level 4 Parcel Translation & Inspector Formatting
   // =========================================================================
+  // Official Google Maps URL scheme; opens the Maps app on phones
+  function googleMapsUrl(lat, lng) {
+    return `https://www.google.com/maps/search/?api=1&query=${Number(lat).toFixed(6)},${Number(lng).toFixed(6)}`;
+  }
+
+  function googleMapsLabel() {
+    return state.lang === 'ru' ? 'Открыть в Google Maps' : state.lang === 'pt' ? 'Abrir no Google Maps' : 'Open in Google Maps';
+  }
+
+  function setInspectorMapsLink(latlng) {
+    const link = document.getElementById('btn-gmaps-parcel');
+    const label = document.getElementById('txt-btn-gmaps-parcel');
+    if (link && latlng) link.href = googleMapsUrl(latlng.lat, latlng.lng);
+    if (label) label.textContent = googleMapsLabel();
+  }
+
   function getParcelTranslation(code, rawLabel) {
     if (!code) return { name: rawLabel || 'N/A', isForest: true, code: 'N/A' };
     const dict = DATA.cosN4Translations && DATA.cosN4Translations[code];
@@ -1017,6 +1034,7 @@
     if (inspector) inspector.classList.remove('hidden');
     if (nameEl) nameEl.textContent = state.lang === 'ru' ? 'Запрос к серверу DGT...' : 'A consultar DGT...';
     if (coordsEl) coordsEl.textContent = `${e.latlng.lat.toFixed(4)}° N, ${Math.abs(e.latlng.lng).toFixed(4)}° W`;
+    setInspectorMapsLink(e.latlng);
 
     fetch(getFeatureInfoUrl)
       .then(res => res.json())
@@ -1184,6 +1202,7 @@
           <button class="custom-popup-btn" onclick="window.florestasApp.openLocationModal('${loc.id}')">
             ${state.lang === 'ru' ? 'Подробно & Маршруты' : state.lang === 'pt' ? 'Ver Detalhes & Trilhos' : 'View Details & Trails'}
           </button>
+          <a class="popup-gmaps-link" href="${googleMapsUrl(loc.lat, loc.lng)}" target="_blank" rel="noopener">📍 ${googleMapsLabel()} ↗</a>
         </div>
       `;
 
@@ -2362,6 +2381,189 @@
   // occurrences (CC BY 4.0) and OpenStreetMap caves / mines (ODbL).
   // =========================================================================
   const GEO = window.FLORESTAS_GEO || { minerals: [], sites: [] };
+  // LNEG shapefile import (scripts/import-lneg-shapefiles.mjs): potential-area polygons + MCE caves
+  const GEO_AREAS = window.FLORESTAS_GEO_AREAS || { areas: { type: 'FeatureCollection', features: [] }, mceCaves: [] };
+  const ALL_SITES = GEO.sites.concat(GEO_AREAS.mceCaves || []);
+
+  // LNEG 2022 "Áreas potenciais de recursos minerais", one layer per commodity group
+  const AREA_GROUPS = {
+    "Au_Ag_Sb": {
+      "color": "#facc15",
+      "ru": "Золото, серебро, сурьма",
+      "pt": "Ouro, prata e antimónio",
+      "en": "Gold, silver and antimony"
+    },
+    "Caul_AreiaSilic": {
+      "color": "#fef3c7",
+      "ru": "Специальные глины (каолин) и кварцевые пески",
+      "pt": "Argilas especiais e areias siliciosas",
+      "en": "Special clays (kaolin) and silica sands"
+    },
+    "Cr_Ni_Va_Talc": {
+      "color": "#4ade80",
+      "ru": "Хром, никель, ванадий, тальк",
+      "pt": "Crómio, níquel, vanádio e talco",
+      "en": "Chromium, nickel, vanadium and talc"
+    },
+    "Cu_Pb_Zn": {
+      "color": "#f97316",
+      "ru": "Медь, свинец, цинк",
+      "pt": "Cobre, chumbo e zinco",
+      "en": "Copper, lead and zinc"
+    },
+    "Fe": {
+      "color": "#ef4444",
+      "ru": "Железо",
+      "pt": "Ferro",
+      "en": "Iron"
+    },
+    "Qz_Feldp_Li_Be": {
+      "color": "#2dd4bf",
+      "ru": "Кварц, полевой шпат, литий, берилл",
+      "pt": "Quartzo, feldspato, lítio e berilo",
+      "en": "Quartz, feldspar, lithium and beryl"
+    },
+    "Salgema_Gesso": {
+      "color": "#e5e7eb",
+      "ru": "Каменная соль и гипс",
+      "pt": "Sal-gema e gesso",
+      "en": "Rock salt and gypsum"
+    },
+    "Uranio": {
+      "color": "#a3e635",
+      "ru": "Уран",
+      "pt": "Urânio",
+      "en": "Uranium"
+    },
+    "W_Sn_Ta_Nb": {
+      "color": "#38bdf8",
+      "ru": "Вольфрам, олово, тантал, ниобий",
+      "pt": "Tungsténio, estanho, tântalo e nióbio",
+      "en": "Tungsten, tin, tantalum and niobium"
+    }
+  };
+
+  const AREA_I18N = {
+    "substance": {
+      "Ouro (Ag, Sb)": {
+        "ru": "Золото (Ag, Sb)",
+        "pt": "Ouro (Ag, Sb)",
+        "en": "Gold (Ag, Sb)"
+      },
+      "Caulino e Areia Especial": {
+        "ru": "Каолин и специальные пески",
+        "pt": "Caulino e Areia Especial",
+        "en": "Kaolin and special sand"
+      },
+      "Caulino": {
+        "ru": "Каолин",
+        "pt": "Caulino",
+        "en": "Kaolin"
+      },
+      "Crómio, níquel e vanádio": {
+        "ru": "Хром, никель и ванадий",
+        "pt": "Crómio, níquel e vanádio",
+        "en": "Chromium, nickel and vanadium"
+      },
+      "Crómio, níquel, vanádio e Talco": {
+        "ru": "Хром, никель, ванадий и тальк",
+        "pt": "Crómio, níquel, vanádio e Talco",
+        "en": "Chromium, nickel, vanadium and talc"
+      },
+      "Zinco e Chumbo": {
+        "ru": "Цинк и свинец",
+        "pt": "Zinco e Chumbo",
+        "en": "Zinc and lead"
+      },
+      "Ferro": {
+        "ru": "Железо",
+        "pt": "Ferro",
+        "en": "Iron"
+      },
+      "Quartzo, feldspato e lítio": {
+        "ru": "Кварц, полевой шпат и литий",
+        "pt": "Quartzo, feldspato e lítio",
+        "en": "Quartz, feldspar and lithium"
+      },
+      "Salgema e Gesso": {
+        "ru": "Каменная соль и гипс",
+        "pt": "Salgema e Gesso",
+        "en": "Rock salt and gypsum"
+      },
+      "Urânio": {
+        "ru": "Уран",
+        "pt": "Urânio",
+        "en": "Uranium"
+      },
+      "Tungsténio, estanho, tântalo e nióbio": {
+        "ru": "Вольфрам, олово, тантал и ниобий",
+        "pt": "Tungsténio, estanho, tântalo e nióbio",
+        "en": "Tungsten, tin, tantalum and niobium"
+      }
+    },
+    "ui": {
+      "areasLayer": {
+        "ru": "Потенциальные зоны полезных ископаемых (LNEG 2022)",
+        "pt": "Áreas potenciais de recursos minerais (LNEG 2022)",
+        "en": "Mineral potential areas (LNEG 2022)"
+      },
+      "areasShort": {
+        "ru": "Зона минерального потенциала",
+        "pt": "Área de potencial mineral",
+        "en": "Mineral potential area"
+      },
+      "areasNote": {
+        "ru": "Зоны, благоприятные для формирования месторождений полезных ископаемых (LNEG, 2022). Показывают геологический потенциал, а не действующие рудники или подтверждённые запасы.",
+        "pt": "Áreas favoráveis à ocorrência de depósitos minerais (LNEG, 2022). Indicam potencial geológico, não minas em exploração nem reservas confirmadas.",
+        "en": "Areas favourable to the occurrence of mineral deposits (LNEG, 2022). They show geological potential, not active mines or confirmed reserves."
+      },
+      "mceCavesLayer": {
+        "ru": "Пещеры и карстовые шахты Эштремадурского известнякового массива (LNEG)",
+        "pt": "Grutas e algares do Maciço Calcário Estremenho (LNEG)",
+        "en": "Caves & sinkholes of the Estremadura Limestone Massif (LNEG)"
+      },
+      "mceCaveShort": {
+        "ru": "Пещера / карстовая шахта (LNEG, Serras de Aire e Candeeiros)",
+        "pt": "Gruta / algar (LNEG, Serras de Aire e Candeeiros)",
+        "en": "Cave / karst shaft (LNEG, Serras de Aire e Candeeiros)"
+      },
+      "unvalidated": {
+        "ru": "Координаты не проверены в полевых условиях (по бумажной инвентаризации парка)",
+        "pt": "Coordenadas não validadas no terreno (do inventário em papel do parque)",
+        "en": "Coordinates not field-validated (from the park's paper inventory)"
+      },
+      "inventoryCode": {
+        "ru": "Код инвентаризации",
+        "pt": "Código de inventário",
+        "en": "Inventory code"
+      },
+      "coordSource": {
+        "ru": "Источник координат",
+        "pt": "Fonte das coordenadas",
+        "en": "Coordinate source"
+      },
+      "areaName": {
+        "ru": "Зона",
+        "pt": "Área",
+        "en": "Area"
+      },
+      "substances": {
+        "ru": "Полезные ископаемые",
+        "pt": "Substâncias",
+        "en": "Substances"
+      },
+      "unnamedArea": {
+        "ru": "Безымянная зона",
+        "pt": "Área sem nome",
+        "en": "Unnamed area"
+      }
+    }
+  };
+
+  function au(key) {
+    const t = AREA_I18N.ui[key];
+    return t ? t[state.lang] || t.pt : key;
+  }
 
   // EU raw-material class of each LNEG CRM2023 occurrence (2023 EU critical / strategic lists)
   const MINERAL_GROUPS = {
@@ -2390,14 +2592,15 @@
 
   const GEO_LAYERS = {
     minerals: { icon: '💎', color: '#2dd4bf', ru: 'Рудопроявления (LNEG)', pt: 'Ocorrências minerais (LNEG)', en: 'Mineral occurrences (LNEG)' },
-    cave: { icon: '🦇', color: '#c084fc', ru: 'Пещеры', pt: 'Grutas', en: 'Caves' },
+    cave: { icon: '🦇', color: '#c084fc', ru: 'Пещеры (OSM)', pt: 'Grutas (OSM)', en: 'Caves (OSM)' },
+    cave_mce: { icon: '🕳️', color: '#e879f9', ru: 'Пещеры и карстовые шахты (LNEG)', pt: 'Grutas e algares (LNEG)', en: 'Caves & karst shafts (LNEG)' },
     mine: { icon: '⛏️', color: '#fbbf24', ru: 'Шахты и штольни (статус не указан)', pt: 'Minas e galerias (estado desconhecido)', en: 'Mines & adits (status unknown)' },
     mine_abandoned: { icon: '🏚️', color: '#a8a29e', ru: 'Заброшенные шахты', pt: 'Minas abandonadas', en: 'Abandoned mines' }
   };
 
   const MIN_STRINGS = {
     ru: {
-      forests: 'Леса', minerals: 'Минералы', layers: 'Слои', groups: 'Вещества', classTitle: 'Класс сырья ЕС', genesis: 'Генезис', substance: 'Вещество',
+      forests: 'Леса', minerals: 'Минералы', areasAll: 'Все', areasNone: 'Скрыть', layers: 'Слои', groups: 'Вещества', classTitle: 'Класс сырья ЕС', genesis: 'Генезис', substance: 'Вещество',
       sort: 'Сортировка', allSubstances: 'Все вещества', allGroups: 'Все группы', results: 'Результаты',
       search: 'Название, вещество, муниципалитет…', sortName: 'По названию', sortSubstance: 'По веществу',
       sortNorth: 'С севера на юг', sortGroup: 'По группе', sortType: 'По типу объекта',
@@ -2413,7 +2616,7 @@
       source: (d1, d2) => `Источники: LNEG — CRM2023 / SIORMINP (CC BY 4.0, ${d1}); © участники OpenStreetMap (ODbL, ${d2}). OSM неполон: отсутствие точки не означает отсутствие объекта.`
     },
     pt: {
-      forests: 'Florestas', minerals: 'Minerais', layers: 'Camadas', groups: 'Substâncias', classTitle: 'Classe UE', genesis: 'Génese', substance: 'Substância',
+      forests: 'Florestas', minerals: 'Minerais', areasAll: 'Todas', areasNone: 'Ocultar', layers: 'Camadas', groups: 'Substâncias', classTitle: 'Classe UE', genesis: 'Génese', substance: 'Substância',
       sort: 'Ordenar', allSubstances: 'Todas as substâncias', allGroups: 'Todos os grupos', results: 'Resultados',
       search: 'Nome, substância, concelho…', sortName: 'Por nome', sortSubstance: 'Por substância',
       sortNorth: 'De norte a sul', sortGroup: 'Por grupo', sortType: 'Por tipo de local',
@@ -2429,7 +2632,7 @@
       source: (d1, d2) => `Fontes: LNEG — CRM2023 / SIORMINP (CC BY 4.0, ${d1}); © contribuidores OpenStreetMap (ODbL, ${d2}). O OSM é incompleto: a ausência de um ponto não significa ausência do local.`
     },
     en: {
-      forests: 'Forests', minerals: 'Minerals', layers: 'Layers', groups: 'Substances', classTitle: 'EU raw-material class', genesis: 'Genesis', substance: 'Substance',
+      forests: 'Forests', minerals: 'Minerals', areasAll: 'All', areasNone: 'Hide', layers: 'Layers', groups: 'Substances', classTitle: 'EU raw-material class', genesis: 'Genesis', substance: 'Substance',
       sort: 'Sort by', allSubstances: 'All substances', allGroups: 'All groups', results: 'Results',
       search: 'Name, substance, municipality…', sortName: 'Name', sortSubstance: 'Substance',
       sortNorth: 'North to south', sortGroup: 'Group', sortType: 'Site type',
@@ -2833,7 +3036,7 @@
       return matchesQuery(m);
     });
     const subWord = f.substance === 'all' ? null : substanceKeyword(f.substance);
-    const sites = GEO.sites.filter(s => {
+    const sites = ALL_SITES.filter(s => {
       if (!f.layers[s.kind] || !matchesQuery(s)) return false;
       if (!subWord) return true;
       return !!s.resource && tv('resource', s.resource) !== s.resource
@@ -2868,16 +3071,16 @@
     const kind = geoKindOf(item);
     const name = item.name || s.unnamed;
     const row = (label, val) => (val ? `<div class="geo-pop-row"><span>${label}</span><strong>${escapeHtml(val)}</strong></div>` : '');
-    const typeLabel = item.group ? MINERAL_GROUPS[item.group][state.lang] : GEO_LAYERS[kind][state.lang];
+    const typeLabel = item.group ? MINERAL_GROUPS[item.group][state.lang] : kind === 'cave_mce' ? au('mceCaveShort') : GEO_LAYERS[kind][state.lang];
     const typeColor = item.group ? MINERAL_GROUPS[item.group].color : GEO_LAYERS[kind].color;
-    const links = [];
+    const links = [`<a href="${googleMapsUrl(item.lat, item.lng)}" target="_blank" rel="noopener">📍 ${googleMapsLabel()} ↗</a>`];
     if (item.link && /^https?:\/\//.test(item.link)) {
       links.push(`<a href="${escapeHtml(item.link)}" target="_blank" rel="noopener">${s.lnegSheet} ↗</a>`);
     }
     if (item.osm) {
       links.push(`<a href="https://www.openstreetmap.org/${escapeHtml(item.osm)}" target="_blank" rel="noopener">${s.osm} ↗</a>`);
     }
-    if (item.name && kind !== 'cave') {
+    if (item.name && kind !== 'cave' && kind !== 'cave_mce') {
       links.push(`<a href="https://www.mindat.org/search.php?search=${encodeURIComponent(item.name)}" target="_blank" rel="noopener">${s.mindat} ↗</a>`);
     }
     return `
@@ -2890,14 +3093,53 @@
         ${row(s.genesis, item.genesis && tv('genesis', item.genesis))}
         ${row(s.resource, item.resource && tv('resource', item.resource))}
         ${row(s.access, item.access && tv('access', item.access))}
+        ${kind === 'cave_mce' ? row(au('inventoryCode'), item.code) + row(au('areaName'), item.area) + row(au('coordSource'), item.coordSource) : ''}
+        ${kind === 'cave_mce' && item.validated === false ? `<div class="geo-pop-note">ℹ️ ${au('unvalidated')}</div>` : ''}
         ${row(s.place, [item.municipality, item.district].filter(Boolean).join(', '))}
         <div class="geo-pop-coords">${item.lat.toFixed(4)}° N, ${Math.abs(item.lng).toFixed(4)}° W</div>
         ${kind !== 'minerals' ? `<div class="geo-pop-warning">⚠️ ${s.safety}</div>` : ''}
-        ${links.length ? `<div class="geo-pop-links">${links.join('')}</div>` : ''}
+        <div class="geo-pop-links">${links.join('')}</div>
       </div>`;
   }
 
   const geoMarkerById = new Map();
+
+  let areasLayer = null;
+
+  function areaGroupVisible(g) {
+    return state.minerals.areaGroups === null || state.minerals.areaGroups.has(g);
+  }
+
+  function areaPopupHtml(p) {
+    const g = AREA_GROUPS[p.group];
+    const sub = AREA_I18N.substance[p.substance];
+    return `
+      <div class="geo-popup">
+        <div class="geo-pop-type" style="color:${g.color}">🗺️ ${escapeHtml(au('areasShort'))}</div>
+        <div class="geo-pop-name">${escapeHtml(p.name || au('unnamedArea'))}</div>
+        <div class="geo-pop-row"><span>${escapeHtml(au('substances'))}</span><strong>${escapeHtml(sub ? sub[state.lang] || p.substance : p.substance || g[state.lang])}</strong></div>
+        <div class="geo-pop-note">${escapeHtml(au('areasNote'))}</div>
+      </div>`;
+  }
+
+  function renderAreasLayer() {
+    if (!map) return;
+    if (!map.getPane('mineralAreas')) {
+      // Below the point markers (overlayPane = 400) so dots stay clickable inside areas
+      map.createPane('mineralAreas').style.zIndex = 350;
+    }
+    if (areasLayer) map.removeLayer(areasLayer);
+    const feats = GEO_AREAS.areas.features.filter(f => areaGroupVisible(f.properties.group));
+    areasLayer = L.geoJSON({ type: 'FeatureCollection', features: feats }, {
+      pane: 'mineralAreas',
+      style: f => {
+        const c = AREA_GROUPS[f.properties.group].color;
+        return { color: c, weight: 1.5, opacity: 0.9, fillColor: c, fillOpacity: 0.22 };
+      },
+      onEachFeature: (f, layer) => layer.bindPopup(() => areaPopupHtml(f.properties), { maxWidth: 300, className: 'geo-leaflet-popup' })
+    });
+    if (state.mapMode === 'minerals') areasLayer.addTo(map);
+  }
 
   function renderGeoLayer() {
     if (!map) return;
@@ -2928,8 +3170,8 @@
     const s = MIN_STRINGS[state.lang];
     const f = state.minerals;
 
-    const counts = { minerals: GEO.minerals.length, cave: 0, mine: 0, mine_abandoned: 0 };
-    GEO.sites.forEach(x => { counts[x.kind] = (counts[x.kind] || 0) + 1; });
+    const counts = { minerals: GEO.minerals.length, cave: 0, cave_mce: 0, mine: 0, mine_abandoned: 0 };
+    ALL_SITES.forEach(x => { counts[x.kind] = (counts[x.kind] || 0) + 1; });
 
     const layersEl = document.getElementById('min-layer-toggles');
     if (layersEl) {
@@ -2954,6 +3196,24 @@
           <span class="pill-name">${MINERAL_GROUPS[g][state.lang]}</span>
           <span class="count-badge">${groupCounts[g]}</span>
         </button>`)).join('');
+    }
+
+    const areasEl = document.getElementById('min-area-filters');
+    if (areasEl) {
+      const areaCounts = {};
+      GEO_AREAS.areas.features.forEach(ft => { areaCounts[ft.properties.group] = (areaCounts[ft.properties.group] || 0) + 1; });
+      const allOn = f.areaGroups === null;
+      const noneOn = f.areaGroups !== null && f.areaGroups.size === 0;
+      areasEl.innerHTML = `
+        <div class="min-area-actions">
+          <button class="btn-pill-action ${allOn ? 'active' : ''}" data-geo-areas="all">${s.areasAll}</button>
+          <button class="btn-pill-action ${noneOn ? 'active' : ''}" data-geo-areas="none">${s.areasNone}</button>
+        </div>` + Object.keys(AREA_GROUPS).filter(g => areaCounts[g]).map(g => `
+        <button class="forest-filter-btn min-area-btn ${areaGroupVisible(g) ? 'active' : ''}" data-geo-area="${g}" aria-pressed="${areaGroupVisible(g)}">
+          <span class="area-swatch" style="background:${AREA_GROUPS[g].color}"></span>
+          <span class="pill-name">${escapeHtml(AREA_GROUPS[g][state.lang])}</span>
+          <span class="count-badge">${areaCounts[g]}</span>
+        </button>`).join('');
     }
 
     const subsEl = document.getElementById('min-substance-filters');
@@ -2984,7 +3244,7 @@
     const searchEl = document.getElementById('input-min-search');
     if (searchEl) searchEl.placeholder = s.search;
 
-    [['txt-min-layers-title', s.layers], ['txt-min-groups-title', s.groups], ['txt-min-class-title', s.classTitle], ['label-min-sort', s.sort], ['txt-min-results', s.results]]
+    [['txt-min-areas-title', au('areasLayer')], ['txt-min-layers-title', s.layers], ['txt-min-groups-title', s.groups], ['txt-min-class-title', s.classTitle], ['label-min-sort', s.sort], ['txt-min-results', s.results]]
       .forEach(([id, txt]) => { const el = document.getElementById(id); if (el) el.textContent = txt; });
     const noteEl = document.getElementById('txt-min-source-note');
     if (noteEl) noteEl.textContent = `${s.appliesNote} ${s.source(GEO.mineralsFetchedAt || '—', GEO.sitesFetchedAt || '—')}`;
@@ -3031,7 +3291,8 @@
     document.getElementById('explainer-icon').textContent = '💎';
     document.getElementById('explainer-title').textContent = s.explTitle(items.length);
     document.getElementById('explainer-badge').textContent = 'LNEG CRM2023 · OSM';
-    document.getElementById('explainer-desc').textContent =
+    const nAreas = GEO_AREAS.areas.features.filter(ft => areaGroupVisible(ft.properties.group)).length;
+    document.getElementById('explainer-desc').textContent = `${au('areasLayer')}: ${nAreas}. ` +
       s.explDesc(c.minerals, c.cave, c.mine, c.mine_abandoned, GEO.mineralsFetchedAt || '—', GEO.sitesFetchedAt || '—');
     const resetBtn = document.getElementById('btn-reset-filters');
     if (resetBtn) resetBtn.classList.add('hidden');
@@ -3062,11 +3323,13 @@
       const inspector = document.getElementById('parcel-inspector');
       if (inspector) inspector.classList.add('hidden');
       renderMineralsPanel();
+      renderAreasLayer();
       renderGeoLayer();
       geoLayerGroup.addTo(map);
       updateMineralsExplainer();
     } else {
       if (geoLayerGroup) map.removeLayer(geoLayerGroup);
+      if (areasLayer) map.removeLayer(areasLayer);
       forestLayers.forEach(l => l.addTo(map));
       updateWmsLayer();
       updateActiveLayerExplainer();
@@ -3086,6 +3349,8 @@
       const layerBtn = e.target.closest('[data-geo-layer]');
       const groupBtn = e.target.closest('[data-geo-group]');
       const subBtn = e.target.closest('[data-geo-substance]');
+      const areaBtn = e.target.closest('[data-geo-area]');
+      const areasBtn = e.target.closest('[data-geo-areas]');
       const listBtn = e.target.closest('[data-geo-index]');
       if (layerBtn) {
         const k = layerBtn.getAttribute('data-geo-layer');
@@ -3097,6 +3362,18 @@
         renderMineralsPanel();
         refreshMinerals();
         collapseSheetOnMobile();
+      } else if (areaBtn || areasBtn) {
+        if (areasBtn) {
+          state.minerals.areaGroups = areasBtn.getAttribute('data-geo-areas') === 'all' ? null : new Set();
+        } else {
+          const g = areaBtn.getAttribute('data-geo-area');
+          const set = state.minerals.areaGroups === null ? new Set(Object.keys(AREA_GROUPS)) : state.minerals.areaGroups;
+          if (set.has(g)) set.delete(g); else set.add(g);
+          state.minerals.areaGroups = set.size === Object.keys(AREA_GROUPS).length ? null : set;
+        }
+        renderMineralsPanel();
+        renderAreasLayer();
+        updateMineralsExplainer();
       } else if (subBtn) {
         state.minerals.substance = subBtn.getAttribute('data-geo-substance');
         renderMineralsPanel();

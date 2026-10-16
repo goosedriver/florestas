@@ -47,7 +47,10 @@ c:\Users\alebedev\Documents\antigravity\Florestas\
 ├── app.js           # State machine, Leaflet map management, CQL filters, events, inspector
 ├── cos-dict.json    # Reference export of all 101 DGT COS Level 4 classes with translations
 ├── geo-data.js      # GENERATED snapshot for Minerals mode (window.FLORESTAS_GEO) — do not hand-edit
+├── geo-areas.js     # GENERATED from LNEG shapefiles: potential areas + MCE caves (window.FLORESTAS_GEO_AREAS)
 ├── scripts/fetch-geodata.mjs  # Regenerates geo-data.js from LNEG + OpenStreetMap
+├── scripts/import-lneg-shapefiles.mjs  # Builds geo-areas.js from downloaded LNEG zips
+├── package.json     # devDependencies for the scripts only (the site itself has none)
 └── AGENTS.md        # This specification file
 ```
 
@@ -108,6 +111,10 @@ The header switch (`.map-mode-btn`, `setMapMode()` in app.js) swaps the forest l
 
 - **Mineral occurrences** — LNEG **CRM2023** "Depósitos de Matérias-Primas Críticas" (`https://sig.lneg.pt/server/rest/services/CRM2023/MapServer`, point layers 7 = critical, 6 = critical & strategic, 5 = strategic), built from SIORMINP records, CC BY 4.0. Fields kept: name, SIORMINP id, substances (element symbols / PT mineral names), size class, genesis, SIORMINP record link. It covers EU critical/strategic raw materials only — say so in the UI. The full SIORMINP service (`OcorrenciasMinerais/MapServer`, 9 commodity-group layers, with municipality/district) is the preferred upgrade, but its query endpoint was timing out on 2026-10-16.
 - Raw attribute values are translated through `MIN_VALUE_I18N` in app.js (pt = LNEG original wording); add new values there when a refresh introduces them.
+- **Mineral potential areas** — LNEG "Áreas potenciais de recursos minerais" (2022), 9 polygon layers (`AREA_GROUPS` in app.js), each a separately toggled tag. They show geological potential only; never describe them as mines or reserves. Drawn in the `mineralAreas` pane (z 350) under the point markers.
+- **MCE caves** (`kind: 'cave_mce'`) — LNEG algares (Pé da Pedreira) and grutas (Codaçal) of the Maciço Calcário Estremenho, a separate layer from OSM caves. Keep the "coordinates not field-validated" note when `validated === false`.
+- Both come from LNEG shapefile downloads, converted by `scripts/import-lneg-shapefiles.mjs` (needs `npm install`: shapefile + proj4) into **`geo-areas.js`** (`window.FLORESTAS_GEO_AREAS`, generated — do not hand-edit). The MCE shapefiles have no `.prj`; they are ETRS89 / PT-TM06 (EPSG:3763). The source zips stay out of git (`zipped_data/` is ignored).
+- Every object popup and the parcel inspector carry an "Open in Google Maps" link (`googleMapsUrl()`).
 - **Caves, mines, abandoned mines** — OpenStreetMap via Overpass (`natural=cave_entrance`, `man_made=mineshaft|adit`, `historic=mine`, `abandoned:/disused:` prefixes), ODbL. Mines without an abandoned/disused/historic tag are labelled "status unknown" — never assume they are active.
 - Both live services are slow or rate-limited and `file:///` cannot fetch JSON, so data is **snapshotted**: `node scripts/fetch-geodata.mjs` (or `--osm-only` to keep the LNEG part). Record the snapshot dates; the UI shows them.
 - Mindat (`mindat.org/loc-14425.html`) has no keyless API and sits behind Cloudflare: use it only as an outbound search link, never as a scraped source.

@@ -1,0 +1,14 @@
+{
+  "name": "florestas-de-portugal",
+  "private": true,
+  "description": "Static site; Node is only used by the data scripts in scripts/.",
+  "type": "module",
+  "scripts": {
+    "fetch:geo": "node scripts/fetch-geodata.mjs",
+    "import:lneg": "node scripts/import-lneg-shapefiles.mjs"
+  },
+  "devDependencies": {
+    "proj4": "2.11.0",
+    "shapefile": "0.6.6"
+  }
+}
