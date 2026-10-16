@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt" data-theme="deep-forest">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Florestas de Portugal — Guia Fenológico, Distribuição & Rastreador de Outono</title>
+  <meta name="description" content="Aplicação interativa trilingue sobre as florestas de Portugal, distribuição de espécies DGT COS 2025, floração e frutificação sazonal e rastreador de folhagem outonal.">
+  
+  <!-- Google Fonts: Inter, Fraunces (botanical cartography serif), and JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet 1.9.4 CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="app-header">
+    <div class="header-brand-wrap">
+      <button class="mobile-toggle-btn" id="btn-toggle-sidebar" aria-label="Toggle menu" title="Menu / Filtros">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+
+      <div class="brand-crest">
+        <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="19" stroke="var(--color-primary-light)" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <path d="M20 6C15 13 10 17 10 23C10 28.5 14.5 33 20 33C25.5 33 30 28.5 30 23C30 17 25 13 20 6Z" fill="url(#tree-grad)" opacity="0.9"/>
+          <path d="M20 10V33M20 18L25 14M20 22L14 18M20 26L26 23M20 28L15 26" stroke="var(--color-parchment-100)" stroke-width="1.6" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="tree-grad" x1="10" y1="6" x2="30" y2="33" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#2d6a4f"/>
+              <stop offset="0.6" stop-color="#1b4332"/>
+              <stop offset="1" stop-color="#d97706"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="brand-titles">
+        <h1 id="app-title" class="app-title">Florestas de Portugal</h1>
+        <p id="app-subtitle" class="app-subtitle">Distribuição Oficial DGT COS 2025 • Fenologia Sazonal • Rastreador de Folhagem Outonal</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Data Authenticity Badge & Modal Trigger -->
+      <div class="data-badge-container" id="data-badge">
+        <span class="live-dot" aria-hidden="true"></span>
+        <button id="btn-open-sources" class="btn-sources" title="Ver detalhes metodológicos e fontes oficiais DGT / ICNF / iNaturalist">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span id="txt-data-sources">Fontes Oficiais DGT (2016–2026)</span>
+        </button>
+      </div>
+
+      <!-- Trilingual Language Switcher -->
+      <nav class="lang-switcher" aria-label="Language selector">
+        <button class="lang-btn" data-lang="ru" title="Русский язык">RU</button>
+        <button class="lang-btn active" data-lang="pt" title="Português Europeu">PT</button>
+        <button class="lang-btn" data-lang="en" title="English">EN</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Application Layout -->
+  <div class="app-layout">
+    
+    <!-- Left Control & Filter Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-scrollable">
+
+        <!-- Season / Date Time-Machine Card -->
+        <section class="card date-card" id="date-card">
+          <div class="card-header-flex">
+            <label id="label-date-selector" class="card-title-label">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span id="txt-date-label">Máquina do Tempo: Época & Fenologia</span>
+            </label>
+            <button id="btn-reset-today" class="btn-pill-action" title="Repor para a data de hoje (16 de Outubro)">
+              <span class="btn-dot"></span>
+              <span id="txt-btn-today">Hoje (16 Out)</span>
+            </button>
+          </div>
+
+          <div class="date-pickers-row">
+            <div class="field-control">
+              <label for="select-month" id="label-month" class="field-label">Mês do Ano</label>
+              <div class="select-wrapper">
+                <select id="select-month" class="custom-select">
+                  <option value="1">01 • Janeiro (Janeiro)</option>
+                  <option value="2">02 • Fevereiro (Fevereiro)</option>
+                  <option value="3">03 • Março (Março)</option>
+                  <option value="4">04 • Abril (Abril)</option>
+                  <option value="5">05 • Maio (Maio)</option>
+                  <option value="6">06 • Junho (Junho)</option>
+                  <option value="7">07 • Julho (Julho)</option>
+                  <option value="8">08 • Agosto (Agosto)</option>
+                  <option value="9">09 • Setembro (Setembro)</option>
+                  <option value="10" selected>10 • Outubro (Outubro)</option>
+                  <option value="11">11 • Novembro (Novembro)</option>
+                  <option value="12">12 • Dezembro (Dezembro)</option>
+                </select>
+                <span class="select-arrow">▾</span>
+              </div>
+            </div>
+
+            <div class="field-control">
+              <label for="select-decade" id="label-decade" class="field-label">Período / Década</label>
+              <div class="select-wrapper">
+                <select id="select-decade" class="custom-select">
+                  <option value="early">Início (dias 1–10)</option>
+                  <option value="mid" selected>Meio (dias 11–20)</option>
+                  <option value="late">Fim (dias 21–31)</option>
+                </select>
+                <span class="select-arrow">▾</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Season Summary Banner -->
+          <div id="season-summary-banner" class="season-summary-banner" role="status" aria-live="polite">
+            <div class="banner-icon">🍂</div>
+            <div class="banner-body">
+              <div class="banner-title" id="banner-season-title">Meados de Outubro em Portugal</div>
+              <p class="banner-desc" id="banner-season-desc">
+                Pico dourado nos castanheiros da Serra da Estrela e Montesinho; floração e frutos vermelhos simultâneos no medronheiro em Monchique; queda de bolota no montado de sobreiro.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Mode / Walk Finder Tabs -->
+        <section class="mode-section" aria-label="Modos de Exploração">
+          <div class="mode-tabs" id="mode-tabs" role="tablist">
+            <button class="mode-tab active" data-mode="all" role="tab" aria-selected="true" id="tab-mode-all">
+              <span class="mode-emoji">🌲</span>
+              <span class="mode-label" id="txt-mode-all">Visão Geral</span>
+            </button>
+            <button class="mode-tab" data-mode="autumn_walk" role="tab" aria-selected="false" id="tab-mode-autumn">
+              <span class="mode-emoji">🍂</span>
+              <span class="mode-label" id="txt-mode-autumn">Trilhos de Outono</span>
+            </button>
+            <button class="mode-tab" data-mode="blooming_fruiting" role="tab" aria-selected="false" id="tab-mode-blooming">
+              <span class="mode-emoji">🌸🌰</span>
+              <span class="mode-label" id="txt-mode-blooming">Flor & Fruto</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Forest Type Filter Section -->
+        <section class="card filter-card" id="filter-forest-type-card">
+          <div class="section-title-row">
+            <span class="section-title" id="txt-title-forest-type">Tipos de Floresta em Portugal</span>
+            <span class="section-tag" id="tag-icnf-cos">DGT COS / ICNF</span>
+          </div>
+
+          <div class="pills-grid" id="filter-forest-type" role="group" aria-label="Filtrar por tipo florestal">
+            <button class="forest-filter-btn active" data-type="all" id="btn-forest-all">
+              <span class="color-dot" style="background:#52b788"></span>
+              <span class="pill-name" id="txt-forest-all">Todas as Florestas</span>
+            </button>
+            <button class="forest-filter-btn" data-type="eucalyptus" id="btn-forest-euc">
+              <span class="color-dot" style="background:#0284c7"></span>
+              <span class="pill-name" id="txt-forest-eucalyptus">Eucaliptais (845 mil ha)</span>
+            </button>
+            <button class="forest-filter-btn" data-type="pine" id="btn-forest-pine">
+              <span class="color-dot" style="background:#0f766e"></span>
+              <span class="pill-name" id="txt-forest-pine">Pinhais & Resinosas (890 mil ha)</span>
+            </button>
+            <button class="forest-filter-btn" data-type="deciduous" id="btn-forest-deciduous">
+              <span class="color-dot" style="background:#d97706"></span>
+              <span class="pill-name" id="txt-forest-deciduous">Folhosas Caducifólias (Carvalhais/Castanheiros)</span>
+            </button>
+            <button class="forest-filter-btn" data-type="montado" id="btn-forest-montado">
+              <span class="color-dot" style="background:#15803d"></span>
+              <span class="pill-name" id="txt-forest-montado">Montado (Sobreiro & Azinheira - 1M ha)</span>
+            </button>
+            <button class="forest-filter-btn" data-type="orchard_shrub" id="btn-forest-orchard">
+              <span class="color-dot" style="background:#f472b6"></span>
+              <span class="pill-name" id="txt-forest-orchard">Pomares de Amendoeira & Matos Fenológicos</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Phenology & Autumn Foliage Status Filter Section -->
+        <section class="card filter-card" id="filter-phenology-card">
+          <div class="section-title-row">
+            <span class="section-title" id="txt-title-pheno-filter">Fenologia & Estado das Folhas</span>
+            <span class="section-tag" id="tag-pheno-mode">Outono 2026</span>
+          </div>
+
+          <div class="pills-grid" id="filter-phenology" role="group" aria-label="Filtrar por estado fenológico">
+            <button class="pheno-filter-btn active" data-pheno="all" id="btn-pheno-all">
+              <span class="pill-emoji">🌐</span>
+              <span class="pill-name" id="txt-pheno-all">Todos os Estados</span>
+            </button>
+            <button class="pheno-filter-btn" data-pheno="flowering" id="btn-pheno-flowering">
+              <span class="pill-emoji">🌸</span>
+              <span class="pill-name" id="txt-pheno-flowering">Floração Ativa</span>
+            </button>
+            <button class="pheno-filter-btn" data-pheno="fruiting" id="btn-pheno-fruiting">
+              <span class="pill-emoji">🌰</span>
+              <span class="pill-name" id="txt-pheno-fruiting">Fruto Maduro (Castanha/Medronho/Bolota)</span>
+            </button>
+            <button class="pheno-filter-btn" data-pheno="foliage_yellowing" id="btn-pheno-yellowing">
+              <span class="pill-emoji">🍂</span>
+              <span class="pill-name" id="txt-pheno-yellowing">Folhas Amarelas / Douradas (Pico de Passeio)</span>
+            </button>
+            <button class="pheno-filter-btn" data-pheno="foliage_fallen" id="btn-pheno-fallen">
+              <span class="pill-emoji">🪵</span>
+              <span class="pill-name" id="txt-pheno-fallen">Folhas Caídas (Inverno / Ramos Despidos)</span>
+            </button>
+            <button class="pheno-filter-btn" data-pheno="foliage_green" id="btn-pheno-green">
+              <span class="pill-emoji">🌿</span>
+              <span class="pill-name" id="txt-pheno-green">Copa Verde / Perenifólia</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Active Phenomenon Breakdown Card (What is Blooming, Fruiting, Yellowing right now) -->
+        <section class="card active-phenomenon-card" id="card-active-phenomenon">
+          <div class="section-title-row">
+            <span class="section-title" id="txt-title-active-pheno">O Que Está a Acontecer Agora (Clique para Isolar no Mapa)</span>
+            <span class="section-tag" id="tag-active-period">16 Out</span>
+          </div>
+          <div class="active-pheno-container" id="container-active-phenomenon">
+            <!-- Dynamically populated by app.js with exact species pills and descriptions -->
+            <div class="active-pheno-loading">
+              <span class="spinner-sm"></span>
+              <span id="txt-loading-pheno">A calcular espécies em floração, fruto e folhagem...</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Specific Tree & Shrub Species Filter Section (Replaces old WMS dropdown/slider) -->
+        <section class="card species-filter-card" id="wms-panel">
+          <div class="section-title-row">
+            <div class="title-with-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+              <span class="section-title" id="txt-title-species-filter">Filtrar por Espécie Arbórea (DGT COS 2025)</span>
+            </div>
+            <span class="status-pill-official">DGT COS 2025</span>
+          </div>
+
+          <!-- Specific species selector dropdown -->
+          <div class="field-control nested-control-none">
+            <label for="select-specific-species" id="label-specific-species" class="field-label-sm">Espécie Específica (Polígonos WMS Oficiais)</label>
+            <div class="select-wrapper">
+              <select id="select-specific-species" class="custom-select select-sm">
+                <option value="all">Todas as espécies (conforme o tipo florestal selecionado)</option>
+                <!-- Populated dynamically with all 16 species -->
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <!-- Quick species pills row for instant one-click WMS filtering -->
+          <div class="quick-species-pills" id="quick-species-pills">
+            <!-- Clickable pills for fast selection -->
+          </div>
+
+          <!-- Clean Map Layer Toggles -->
+          <div class="toggles-compact-row">
+            <div class="control-row-toggle">
+              <label class="switch-container">
+                <input type="checkbox" id="toggle-wms-cos" checked aria-describedby="desc-wms-cos">
+                <span class="slider-round"></span>
+              </label>
+              <div class="toggle-text-block">
+                <label for="toggle-wms-cos" class="toggle-heading" id="label-toggle-cos">Polígonos Oficiais DGT COS 2025</label>
+                <span class="toggle-sub" id="desc-wms-cos">Filtro CQL sincronizado em tempo real</span>
+              </div>
+            </div>
+
+            <div class="control-row-toggle">
+              <label class="switch-container">
+                <input type="checkbox" id="toggle-inat-live" checked aria-describedby="desc-inat-live">
+                <span class="slider-round"></span>
+              </label>
+              <div class="toggle-text-block">
+                <label for="toggle-inat-live" class="toggle-heading" id="label-toggle-inat">iNaturalist Observações Vivas</label>
+                <span class="toggle-sub" id="desc-inat-live">Registos de campo validados (2016–2026)</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Search & Filtered Locations / Species Tabs -->
+        <section class="sidebar-results" id="sidebar-results">
+          <!-- Search input -->
+          <div class="search-input-wrap">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="input-search" placeholder="Pesquisar serras, matas, castanheiros, medronho..." autocomplete="off">
+            <button id="btn-clear-search" class="btn-clear-search" title="Limpar pesquisa" aria-label="Limpar pesquisa">✕</button>
+          </div>
+
+          <!-- Results Tab Navigation -->
+          <div class="results-subtabs" role="tablist">
+            <button class="subtab-btn active" id="tab-btn-locations" role="tab" aria-selected="true">
+              <span id="txt-tab-locations">Florestas & Trilhos</span>
+              <span class="count-badge" id="count-locations">0</span>
+            </button>
+            <button class="subtab-btn" id="tab-btn-species" role="tab" aria-selected="false">
+              <span id="txt-tab-species">Guia de Espécies</span>
+              <span class="count-badge" id="count-species">0</span>
+            </button>
+            <button class="subtab-btn" id="tab-btn-stats" role="tab" aria-selected="false">
+              <span id="txt-tab-stats">Estatísticas ICNF</span>
+            </button>
+          </div>
+
+          <!-- Tab Panels -->
+          <div class="tab-panels-wrap">
+            <!-- Locations List -->
+            <div class="results-list-container" id="list-locations" role="tabpanel" aria-labelledby="tab-btn-locations">
+              <!-- Location cards will be dynamically rendered by app.js -->
+              <div class="list-placeholder">
+                <div class="spinner-sm"></div>
+                <p id="txt-loading-locations">A carregar florestas e percursos de outono...</p>
+              </div>
+            </div>
+
+            <!-- Species Guide List (hidden by default) -->
+            <div class="results-list-container hidden" id="list-species" role="tabpanel" aria-labelledby="tab-btn-species">
+              <!-- Species cards will be dynamically rendered by app.js -->
+            </div>
+
+            <!-- ICNF IFN6 National Statistics Panel (hidden by default) -->
+            <div class="results-list-container hidden" id="panel-stats" role="tabpanel" aria-labelledby="tab-btn-stats">
+              <div class="stats-panel-content" id="stats-content">
+                <!-- Rich statistical overview cards populated by app.js or static baseline -->
+                <div class="stats-card">
+                  <div class="stats-card-header">
+                    <span class="stats-card-title" id="stat-ifn6-title">Inventário Florestal Nacional (IFN6)</span>
+                    <span class="stats-badge">ICNF 2019 / DGT 2025</span>
+                  </div>
+                  <p class="stats-card-desc" id="stat-ifn6-desc">
+                    Portugal possui 3,2 milhões de hectares de floresta (36% do território continental), complementados por 2,6 milhões de ha de matos e pastagens.
+                  </p>
+                  <div class="stats-metrics-grid">
+                    <div class="stat-metric-box">
+                      <span class="metric-val">36%</span>
+                      <span class="metric-lbl" id="stat-lbl-forest-cover">Área Florestal de Portugal Continental</span>
+                    </div>
+                    <div class="stat-metric-box">
+                      <span class="metric-val">845k ha</span>
+                      <span class="metric-lbl" id="stat-lbl-euc">Eucaliptais (26% da floresta)</span>
+                    </div>
+                    <div class="stat-metric-box">
+                      <span class="metric-val">715k ha</span>
+                      <span class="metric-lbl" id="stat-lbl-cork">Montados de Sobreiro (23%)</span>
+                    </div>
+                    <div class="stat-metric-box">
+                      <span class="metric-val">714k ha</span>
+                      <span class="metric-lbl" id="stat-lbl-pine">Pinheiro-bravo & manso (22%)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </aside>
+
+    <!-- Center/Right Map Area -->
+    <main class="map-container" role="main">
+      <!-- Leaflet Map Container -->
+      <div id="map" class="map-canvas"></div>
+
+      <!-- Floating Top-Right Map Status Bar -->
+      <div class="map-status-bar" id="map-status-bar" role="status" aria-live="polite">
+        <div class="status-bar-pill">
+          <!-- Marker Visibility Toggle Button -->
+          <button class="status-pill-btn active" id="btn-toggle-markers" title="Ligar/desligar marcadores (para ver apenas os polígonos florestais DGT)">
+            <span class="btn-dot-live"></span>
+            <span id="txt-btn-markers">Marcadores: LIGADOS</span>
+          </button>
+
+          <div class="divider-v"></div>
+
+          <!-- Base Map Switcher -->
+          <button class="status-pill-btn" id="btn-cycle-basemap" title="Mudar mapa de base (Esri Dark Canvas / OpenStreetMap / Esri Satélite)">
+            <span id="txt-btn-basemap">🗺️ Esri Dark Gray</span>
+          </button>
+
+          <div class="divider-v"></div>
+
+          <div class="wms-active-indicator">
+            <span class="dot-radar"></span>
+            <span class="wms-current-layer" id="txt-active-wms">DGT COS 2025 v1</span>
+          </div>
+
+          <div class="divider-v"></div>
+
+          <div class="inat-live-indicator" id="inat-status">
+            <span class="inat-dot"></span>
+            <span class="inat-text" id="txt-inat-status">iNaturalist: Ativo</span>
+          </div>
+
+          <div class="divider-v"></div>
+
+          <div class="map-hint-text" id="map-hint-instruction">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            <span id="txt-map-hint">Clique no mapa para consultar a parcela DGT COS 2025</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Active Layer & Phenomenon Explainer Banner -->
+      <div class="active-layer-explainer" id="active-layer-explainer" role="status" aria-live="polite">
+        <div class="explainer-icon" id="explainer-icon">🌲</div>
+        <div class="explainer-body">
+          <div class="explainer-title-row">
+            <span class="explainer-title" id="explainer-title">Todas as Florestas de Portugal (DGT COS 2025)</span>
+            <span class="explainer-badge" id="explainer-badge">WMS Oficial</span>
+          </div>
+          <p class="explainer-desc" id="explainer-desc">
+            Apresenta o coberto florestal oficial de Portugal Continental (~3,2M ha). Clique em qualquer ponto para consultar a parcela de solo.
+          </p>
+        </div>
+        <button class="explainer-reset-btn hidden" id="btn-reset-filters" title="Limpar filtros e repor visão geral" aria-label="Limpar filtros">✕</button>
+      </div>
+
+      <!-- Floating Bottom-Left Interactive Legend -->
+      <section class="map-legend collapsed" id="map-legend" aria-label="Legenda do Mapa">
+        <header class="legend-header" id="legend-header">
+          <div class="legend-header-left">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span class="legend-title" id="txt-legend-title">Legenda Cartográfica & Fenologia</span>
+          </div>
+          <button class="btn-legend-toggle" id="btn-toggle-legend" aria-expanded="false" title="Expandir/recolher legenda">
+            <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        </header>
+
+        <div class="legend-body" id="legend-content">
+          <!-- Forest Types / Markers Legend -->
+          <div class="legend-group">
+            <div class="legend-group-title" id="txt-legend-markers">Marcadores Florestais & Serras</div>
+            <div class="legend-grid" id="legend-forest-types-items">
+              <div class="legend-item"><span class="marker-swatch color-eucalyptus"></span><span id="leg-euc">Eucaliptais</span></div>
+              <div class="legend-item"><span class="marker-swatch color-pine"></span><span id="leg-pine">Pinhais & Resinosas</span></div>
+              <div class="legend-item"><span class="marker-swatch color-deciduous"></span><span id="leg-deciduous">Folhosas Caducifólias (Carvalho/Castanheiro)</span></div>
+              <div class="legend-item"><span class="marker-swatch color-montado"></span><span id="leg-montado">Montado (Sobreiro/Azinheira)</span></div>
+              <div class="legend-item"><span class="marker-swatch color-orchard"></span><span id="leg-orchard">Amendoeiras & Arbustos</span></div>
+            </div>
+          </div>
+
+          <!-- Phenology / Foliage Legend -->
+          <div class="legend-group">
+            <div class="legend-group-title" id="txt-legend-pheno">Estado das Folhas & Frutos no Período Selecionado</div>
+            <div class="legend-grid" id="legend-pheno-items">
+              <div class="legend-item"><span class="pheno-symbol-swatch bg-yellow">🍂</span><span id="leg-fol-yellow">Folhas Douradas / Amarelas (Ideal para Passear)</span></div>
+              <div class="legend-item"><span class="pheno-symbol-swatch bg-fallen">🪵</span><span id="leg-fol-fallen">Folhas já caídas no solo</span></div>
+              <div class="legend-item"><span class="pheno-symbol-swatch bg-flowering">🌸</span><span id="leg-flowering">Floração em curso</span></div>
+              <div class="legend-item"><span class="pheno-symbol-swatch bg-fruiting">🌰</span><span id="leg-fruiting">Fruto maduro / Colheita</span></div>
+            </div>
+          </div>
+
+          <!-- DGT COS 2025 Official Satellite Legend -->
+          <div class="legend-group">
+            <div class="legend-group-title" id="txt-legend-cos">Cores Oficiais WMS DGT COS 2025 v1</div>
+            <div class="legend-cos-bar" title="Classificação COS Nível 4">
+              <span class="cos-chip cos-forest-euc" title="Florestas de Eucalipto">Eucaliptal</span>
+              <span class="cos-chip cos-forest-pine" title="Florestas de Pinheiro">Pinhal</span>
+              <span class="cos-chip cos-forest-oak" title="Carvalhais e Folhosas Caducifólias">Carvalhal</span>
+              <span class="cos-chip cos-forest-montado" title="Montados de Sobreiro e Azinheira">Montado</span>
+              <span class="cos-chip cos-forest-shrub" title="Matos e Pomares">Matos</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Floating Bottom-Right Point Inspector Drawer -->
+      <section class="parcel-inspector hidden" id="parcel-inspector" aria-label="Inspetor de Parcela Florestal DGT" role="region">
+        <header class="inspector-header">
+          <div class="inspector-title-wrap">
+            <span class="inspector-badge" id="inspector-status-badge">DGT COS 2025v1</span>
+            <h3 class="inspector-heading" id="txt-inspector-title">Informação da Parcela de Solo</h3>
+          </div>
+          <button class="btn-close-drawer" id="btn-close-inspector" aria-label="Fechar inspetor" title="Fechar">✕</button>
+        </header>
+
+        <div class="inspector-body" id="parcel-inspector-content">
+          <!-- Dynamic GetFeatureInfo details will be inserted by app.js -->
+          <div class="inspector-details" id="inspector-data-block">
+            <div class="inspector-prop-row">
+              <span class="prop-label" id="lbl-prop-name">Uso do Solo (N4):</span>
+              <span class="prop-value" id="val-parcel-name">Floresta de Folhosas</span>
+            </div>
+            <div class="inspector-prop-row">
+              <span class="prop-label" id="lbl-prop-code">Código COS 2025:</span>
+              <span class="prop-value mono" id="val-parcel-code">5.1.1.02</span>
+            </div>
+            <div class="inspector-prop-row">
+              <span class="prop-label" id="lbl-prop-area">Área do Polígono:</span>
+              <span class="prop-value" id="val-parcel-area">14.8 ha</span>
+            </div>
+            <div class="inspector-prop-row">
+              <span class="prop-label" id="lbl-prop-coords">Coordenadas:</span>
+              <span class="prop-value mono" id="val-parcel-coords">40.3541° N, -7.5842° W</span>
+            </div>
+            <div class="inspector-prop-row">
+              <span class="prop-label" id="lbl-prop-concelho">Concelho / Região:</span>
+              <span class="prop-value" id="val-parcel-region">Manteigas, Serra da Estrela</span>
+            </div>
+          </div>
+          <div class="inspector-actions">
+            <button class="btn-sm btn-outline-forest" id="btn-zoom-parcel">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+              <span id="txt-btn-zoom-parcel">Aproximar Parcela</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal: Official Data Sources, Methodology & Honesty Note -->
+  <div class="modal-backdrop hidden" id="modal-sources" role="dialog" aria-modal="true" aria-labelledby="modal-sources-title">
+    <div class="modal-dialog">
+      <header class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-kicker" id="txt-sources-kicker">Transparência & Dados Oficiais</span>
+          <h2 class="modal-title" id="modal-sources-title">Fontes Oficiais & Metodologia Fenológica (2016–2026)</h2>
+        </div>
+        <button class="modal-close-btn" id="btn-close-sources" aria-label="Fechar janela">✕</button>
+      </header>
+
+      <div class="modal-body-scrollable">
+        <!-- Section: DGT COS 2025 -->
+        <article class="source-card">
+          <div class="source-card-header">
+            <span class="source-tag dgt">DGT • Direção-Geral do Território</span>
+            <span class="source-year">2023 – 2025 v1 (Mais Recente)</span>
+          </div>
+          <h3 class="source-name">Carta de Ocupação do Solo (COS 2025 v1 & COS 2023)</h3>
+          <p class="source-desc" id="desc-dgt-cos">
+            Serviço WMS oficial nacional (<code>https://snig.dgterritorio.gov.pt/wms/cos</code>) que mapeia a ocupação do solo de Portugal Continental com base em imagens orbitais Sentinel-2 (resolução 10 metros). A classificação de nível 4 distingue minuciosamente eucaliptais (puros e mistos), pinhais bravos e mansos, sobreirais, azinhais, castanheiros e carvalhais caducifólios.
+          </p>
+          <div class="source-meta-row">
+            <span class="meta-item">Camada: <code>COS-S2:cos2025v1-s2</code></span>
+            <span class="meta-item">Projeção: EPSG:4326 / EPSG:3857 / EPSG:3763</span>
+          </div>
+        </article>
+
+        <!-- Section: ICNF IFN6 -->
+        <article class="source-card">
+          <div class="source-card-header">
+            <span class="source-tag icnf">ICNF • Instituto da Conservação da Natureza</span>
+            <span class="source-year">IFN6 2019 + Estatísticas Florestais 2024</span>
+          </div>
+          <h3 class="source-name">6.º Inventário Florestal Nacional (IFN6)</h3>
+          <p class="source-desc" id="desc-icnf-ifn6">
+            Inventário de referência nacional da estrutura das florestas portuguesas. Fornece dados fidedignos sobre a distribuição de área: Eucaliptais (845.000 ha / 26%), Sobreiro (715.000 ha / 23%), Pinheiro-bravo (714.000 ha / 22%), Azinheira (350.000 ha / 11%), e Carvalhos/Castanheiros caducifólios (180.000 ha / 6%).
+          </p>
+        </article>
+
+        <!-- Section: iNaturalist API Live -->
+        <article class="source-card">
+          <div class="source-card-header">
+            <span class="source-tag inat">iNaturalist API v1</span>
+            <span class="source-year">Observações Vivas 2016–2026</span>
+          </div>
+          <h3 class="source-name">Rede de Ciência Cidadã & Flora-On</h3>
+          <p class="source-desc" id="desc-inat-api">
+            Integração em tempo real com a API pública do iNaturalist para Portugal continental (place_id 7122). Apresenta fotografias e registos georreferenciados de grau de investigação (Research Grade) das espécies arbóreas e arbustivas, permitindo verificar em direto as árvores a florir e a frutificar nos trilhos.
+          </p>
+        </article>
+
+        <!-- Section: Autumn Foliage Phenology Model -->
+        <article class="source-card">
+          <div class="source-card-header">
+            <span class="source-tag pheno">Modelo Fenológico</span>
+            <span class="source-year">Calibração Bioclimática</span>
+          </div>
+          <h3 class="source-name">Rastreador de Folhagem Outonal & Floração Sazonal</h3>
+          <p class="source-desc" id="desc-pheno-model">
+            O estado foliar das espécies caducifólias (Castanheiro, Carvalho-negral, Carvalho-alvarinho, Pilriteiro, Faia) é calculado em função da altitude da serra e da época do mês. O pico de amarelecimento / ouro ("Pico de Passeio") ocorre primeiro nas altas altitudes do Norte e Centro (Montesinho, Estrela, Peneda-Gerês em outubro) e desce para vales e áreas mais a sul até meados de novembro, antes da queda definitiva das folhas.
+          </p>
+        </article>
+      </div>
+
+      <footer class="modal-footer">
+        <button class="btn-primary-forest" id="btn-sources-dismiss">
+          <span id="txt-btn-understand">Entendido / Explorar Mapa</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal: Detailed View for Forest Location or Tree/Shrub Species -->
+  <div class="modal-backdrop hidden" id="modal-detail" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="modal-dialog modal-dialog-lg">
+      <header class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="detail-kicker-tags">
+            <span class="detail-badge-type" id="detail-category">Floresta Caducifólia</span>
+            <span class="detail-badge-status" id="detail-foliage-status">🍂 Folhas Douradas Agora</span>
+          </div>
+          <h2 class="modal-title" id="detail-title">Mata da Albergaria & Rio Homem</h2>
+          <p class="modal-subtitle" id="detail-subtitle">Parque Nacional da Peneda-Gerês • Altitude: 750m–1100m</p>
+        </div>
+        <button class="modal-close-btn" id="btn-close-detail" aria-label="Fechar detalhes">✕</button>
+      </header>
+
+      <div class="modal-body-scrollable">
+        <!-- Overview summary & description -->
+        <section class="detail-section">
+          <div class="detail-lead-block">
+            <p class="detail-desc" id="detail-description">
+              Um dos mais emblemáticos carvalhais de carvalho-alvarinho (Quercus robur) e carvalho-negral de Portugal. Em meados de outubro, as copas transformam-se em tons de âmbar e ocre, oferecendo percursos pedonais de cortar a respiração.
+            </p>
+          </div>
+        </section>
+
+        <!-- Current Season Badges Row -->
+        <section class="detail-section">
+          <h4 class="detail-section-title" id="txt-detail-now-heading">Estado em Meados de Outubro</h4>
+          <div class="detail-status-grid">
+            <div class="status-box">
+              <span class="status-box-icon">🍂</span>
+              <div class="status-box-content">
+                <span class="status-box-lbl" id="lbl-box-foliage">Folhagem de Outono</span>
+                <span class="status-box-val" id="detail-box-foliage">Pico Dourado (Amarelamento Máximo)</span>
+              </div>
+            </div>
+            <div class="status-box">
+              <span class="status-box-icon">🌸</span>
+              <div class="status-box-content">
+                <span class="status-box-lbl" id="lbl-box-flowering">Floração</span>
+                <span class="status-box-val" id="detail-box-flowering">Inativa / Terminou em Maio</span>
+              </div>
+            </div>
+            <div class="status-box">
+              <span class="status-box-icon">🌰</span>
+              <div class="status-box-content">
+                <span class="status-box-lbl" id="lbl-box-fruiting">Fruto & Bolota</span>
+                <span class="status-box-val" id="detail-box-fruiting">Maturação e Queda de Bolota</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 12-Month Phenology Calendar Bar Chart -->
+        <section class="detail-section">
+          <div class="section-title-row">
+            <h4 class="detail-section-title" id="txt-detail-pheno-chart">Calendário Fenológico Anual (12 Meses)</h4>
+            <span class="pheno-legend-hint" id="txt-chart-legend">🌸 Flor • 🌰 Fruto • 🍂 Folha Dourada • 🪵 Ramo Despido</span>
+          </div>
+          <div class="phenology-calendar-wrapper" id="detail-phenology-calendar">
+            <!-- Dynamic 12-month phenology grid built by app.js -->
+          </div>
+        </section>
+
+        <!-- Recommended Walking Trails Section -->
+        <section class="detail-section" id="detail-section-trails">
+          <h4 class="detail-section-title" id="txt-detail-trails-heading">Trilhos Pedonais Recomendados para Outono</h4>
+          <div class="trails-list" id="detail-trails-list">
+            <!-- Dynamic trail items inserted by app.js -->
+          </div>
+        </section>
+
+        <!-- Live iNaturalist Field Observations & Photos -->
+        <section class="detail-section">
+          <div class="section-title-row">
+            <h4 class="detail-section-title" id="txt-detail-inat-photos">Observações & Fotografias de Campo (iNaturalist)</h4>
+            <button class="btn-sm btn-outline-forest" id="btn-load-inat-local">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              <span id="txt-btn-refresh-inat">Atualizar Fotografias</span>
+            </button>
+          </div>
+          <div class="inat-photos-grid" id="detail-inat-photos">
+            <!-- Dynamic photo thumbnails inserted by app.js -->
+            <div class="inat-loading-placeholder">
+              <span class="spinner-sm"></span>
+              <span id="txt-inat-loading">A carregar registos fotográficos do iNaturalist...</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="modal-footer">
+        <button class="btn-secondary" id="btn-close-detail-footer">
+          <span id="txt-btn-close">Fechar</span>
+        </button>
+        <button class="btn-primary-forest" id="btn-focus-on-map">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          <span id="txt-btn-locate-map">Centrar no Mapa</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Leaflet 1.9.4 JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Florestas Data & Application Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

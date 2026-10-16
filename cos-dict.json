@@ -1,0 +1,709 @@
+{
+  "1.1.1.1": {
+    "code": "1.1.1.1",
+    "pt": "Áreas edificadas residenciais contínuas predominantemente verticais",
+    "ru": "Многоэтажная жилая сплошная застройка",
+    "en": "Predominantly high-rise continuous residential fabric",
+    "isForest": false
+  },
+  "1.1.1.2": {
+    "code": "1.1.1.2",
+    "pt": "Áreas edificadas residenciais contínuas predominantemente horizontais",
+    "ru": "Малоэтажная жилая сплошная застройка",
+    "en": "Predominantly low-rise continuous residential fabric",
+    "isForest": false
+  },
+  "1.1.2.1": {
+    "code": "1.1.2.1",
+    "pt": "Áreas edificadas residenciais descontínuas",
+    "ru": "Прерывистая жилая застройка",
+    "en": "Discontinuous residential urban fabric",
+    "isForest": false
+  },
+  "1.1.2.2": {
+    "code": "1.1.2.2",
+    "pt": "Áreas edificadas residenciais descontínuas esparsas",
+    "ru": "Разреженная жилая застройка",
+    "en": "Sparse discontinuous residential fabric",
+    "isForest": false
+  },
+  "1.2.1.1": {
+    "code": "1.2.1.1",
+    "pt": "Indústria e logística",
+    "ru": "Промышленность и логистические комплексы",
+    "en": "Industrial and logistics complexes",
+    "isForest": false
+  },
+  "1.2.1.2": {
+    "code": "1.2.1.2",
+    "pt": "Comércio e serviços",
+    "ru": "Коммерческие центры и сфера услуг",
+    "en": "Commercial and service facilities",
+    "isForest": false
+  },
+  "1.2.2.1": {
+    "code": "1.2.2.1",
+    "pt": "Áreas edificadas turísticas",
+    "ru": "Туристические гостиничные комплексы",
+    "en": "Tourism accommodation complexes",
+    "isForest": false
+  },
+  "1.2.2.2": {
+    "code": "1.2.2.2",
+    "pt": "Parques de campismo e de caravanismo",
+    "ru": "Кемпинги и караванинг",
+    "en": "Campgrounds and caravan parks",
+    "isForest": false
+  },
+  "1.2.3.1": {
+    "code": "1.2.3.1",
+    "pt": "Instalações agrícolas e pecuárias",
+    "ru": "Сельскохозяйственные и животноводческие комплексы",
+    "en": "Agricultural and livestock facilities",
+    "isForest": false
+  },
+  "1.2.3.2": {
+    "code": "1.2.3.2",
+    "pt": "Instalações aquícolas",
+    "ru": "Аквакультурные рыбные хозяйства",
+    "en": "Aquaculture facilities",
+    "isForest": false
+  },
+  "1.3.1.1": {
+    "code": "1.3.1.1",
+    "pt": "Equipamentos de educação",
+    "ru": "Образовательные учреждения и кампусы",
+    "en": "Educational facilities",
+    "isForest": false
+  },
+  "1.3.1.2": {
+    "code": "1.3.1.2",
+    "pt": "Equipamentos de saúde",
+    "ru": "Медицинские комплексы и больницы",
+    "en": "Healthcare facilities",
+    "isForest": false
+  },
+  "1.3.2.1": {
+    "code": "1.3.2.1",
+    "pt": "Equipamentos culturais",
+    "ru": "Культурные учреждения и театры",
+    "en": "Cultural facilities",
+    "isForest": false
+  },
+  "1.3.2.2": {
+    "code": "1.3.2.2",
+    "pt": "Sítios arqueológicos",
+    "ru": "Археологические памятники и раскопки",
+    "en": "Archaeological sites",
+    "isForest": false
+  },
+  "1.3.3.1": {
+    "code": "1.3.3.1",
+    "pt": "Equipamentos desportivos",
+    "ru": "Спортивные комплексы и стадионы",
+    "en": "Sports facilities",
+    "isForest": false
+  },
+  "1.3.3.2": {
+    "code": "1.3.3.2",
+    "pt": "Equipamentos de lazer",
+    "ru": "Рекреационные парки и зоны отдыха",
+    "en": "Leisure facilities",
+    "isForest": false
+  },
+  "1.3.3.3": {
+    "code": "1.3.3.3",
+    "pt": "Campos de golfe",
+    "ru": "Поля для гольфа",
+    "en": "Golf courses",
+    "isForest": false
+  },
+  "1.3.4.1": {
+    "code": "1.3.4.1",
+    "pt": "Cemitérios",
+    "ru": "Кладбища и мемориалы",
+    "en": "Cemeteries",
+    "isForest": false
+  },
+  "1.3.4.2": {
+    "code": "1.3.4.2",
+    "pt": "Outros equipamentos",
+    "ru": "Прочие общественные сооружения",
+    "en": "Other community facilities",
+    "isForest": false
+  },
+  "1.4.1.1": {
+    "code": "1.4.1.1",
+    "pt": "Infraestruturas de produção de energia hídrica",
+    "ru": "Гидроэлектростанции и дамбы",
+    "en": "Hydroelectric dams and facilities",
+    "isForest": false
+  },
+  "1.4.1.2": {
+    "code": "1.4.1.2",
+    "pt": "Infraestruturas de produção de energia solar",
+    "ru": "Солнечные электростанции (СЭС)",
+    "en": "Solar power plants",
+    "isForest": false
+  },
+  "1.4.1.3": {
+    "code": "1.4.1.3",
+    "pt": "Outras Infraestruturas de produção de energia renovável",
+    "ru": "Ветровые электростанции (ВЭС)",
+    "en": "Wind power farms",
+    "isForest": false
+  },
+  "1.4.2.1": {
+    "code": "1.4.2.1",
+    "pt": "Infraestruturas de produção de energia de fonte fóssil",
+    "ru": "ТЭЦ и ископаемая энергетика",
+    "en": "Thermal power plants",
+    "isForest": false
+  },
+  "1.4.3.1": {
+    "code": "1.4.3.1",
+    "pt": "Subestações e postos de transformação de energia",
+    "ru": "Электрические подстанции и ЛЭП",
+    "en": "Electrical substations and power lines",
+    "isForest": false
+  },
+  "1.4.4.1": {
+    "code": "1.4.4.1",
+    "pt": "Infraestruturas de captação e tratamento de águas para consumo",
+    "ru": "Водозаборы и станции водоподготовки",
+    "en": "Water intake and treatment stations",
+    "isForest": false
+  },
+  "1.4.4.2": {
+    "code": "1.4.4.2",
+    "pt": "Infraestruturas de drenagem e tratamento de águas residuais",
+    "ru": "Очистные сооружения сточных вод",
+    "en": "Wastewater treatment plants",
+    "isForest": false
+  },
+  "1.4.5.1": {
+    "code": "1.4.5.1",
+    "pt": "Aterros",
+    "ru": "Полигоны ТБО и свалки",
+    "en": "Landfill sites",
+    "isForest": false
+  },
+  "1.4.5.2": {
+    "code": "1.4.5.2",
+    "pt": "Outras infraestruturas de resíduos",
+    "ru": "Мусороперерабатывающие комплексы",
+    "en": "Waste treatment facilities",
+    "isForest": false
+  },
+  "1.4.6.1": {
+    "code": "1.4.6.1",
+    "pt": "Infraestruturas militares",
+    "ru": "Военные объекты и базы",
+    "en": "Military installations",
+    "isForest": false
+  },
+  "1.4.6.2": {
+    "code": "1.4.6.2",
+    "pt": "Outras infraestruturas",
+    "ru": "Прочие объекты инфраструктуры",
+    "en": "Other infrastructure",
+    "isForest": false
+  },
+  "1.5.1.1": {
+    "code": "1.5.1.1",
+    "pt": "Rede rodoviária",
+    "ru": "Автодорожная сеть и развязки",
+    "en": "Road network and interchanges",
+    "isForest": false
+  },
+  "1.5.1.2": {
+    "code": "1.5.1.2",
+    "pt": "Rede ferroviária",
+    "ru": "Железнодорожные пути и станции",
+    "en": "Railways and train stations",
+    "isForest": false
+  },
+  "1.5.2.1": {
+    "code": "1.5.2.1",
+    "pt": "Terminais portuários de mar e de rio",
+    "ru": "Морские и речные грузовые порты",
+    "en": "Commercial sea and river ports",
+    "isForest": false
+  },
+  "1.5.2.2": {
+    "code": "1.5.2.2",
+    "pt": "Estaleiros navais e docas secas",
+    "ru": "Судоверфи и сухие доки",
+    "en": "Shipyards and dry docks",
+    "isForest": false
+  },
+  "1.5.2.3": {
+    "code": "1.5.2.3",
+    "pt": "Marinas e docas pesca",
+    "ru": "Марины, яхт-клубы и рыбные гавани",
+    "en": "Marinas and fishing docks",
+    "isForest": false
+  },
+  "1.5.3.1": {
+    "code": "1.5.3.1",
+    "pt": "Aeroportos",
+    "ru": "Международные аэропорты",
+    "en": "International airports",
+    "isForest": false
+  },
+  "1.5.3.2": {
+    "code": "1.5.3.2",
+    "pt": "Aeródromos",
+    "ru": "Аэродромы и взлетные полосы",
+    "en": "Airfields and runways",
+    "isForest": false
+  },
+  "1.5.4.1": {
+    "code": "1.5.4.1",
+    "pt": "Áreas de estacionamento",
+    "ru": "Автомобильные парковки и терминалы",
+    "en": "Parking areas and transit hubs",
+    "isForest": false
+  },
+  "1.6.1.1": {
+    "code": "1.6.1.1",
+    "pt": "Minas a céu aberto",
+    "ru": "Открытые рудники и карьеры полезных ископаемых",
+    "en": "Open-cast mines and pits",
+    "isForest": false
+  },
+  "1.6.1.2": {
+    "code": "1.6.1.2",
+    "pt": "Pedreiras",
+    "ru": "Каменоломни и добыча гранита/мрамора",
+    "en": "Stone and marble quarries",
+    "isForest": false
+  },
+  "1.7.1.1": {
+    "code": "1.7.1.1",
+    "pt": "Vazios sem construção",
+    "ru": "Vazios sem construção",
+    "en": "Vazios sem construção",
+    "isForest": false
+  },
+  "1.7.1.2": {
+    "code": "1.7.1.2",
+    "pt": "Áreas em construção",
+    "ru": "Áreas em construção",
+    "en": "Áreas em construção",
+    "isForest": false
+  },
+  "1.8.1.1": {
+    "code": "1.8.1.1",
+    "pt": "Espaços verdes",
+    "ru": "Espaços verdes",
+    "en": "Espaços verdes",
+    "isForest": false
+  },
+  "1.8.1.2": {
+    "code": "1.8.1.2",
+    "pt": "Hortas comunitárias",
+    "ru": "Hortas comunitárias",
+    "en": "Hortas comunitárias",
+    "isForest": false
+  },
+  "2.1.1.1": {
+    "code": "2.1.1.1",
+    "pt": "Culturas temporárias de sequeiro e regadio",
+    "ru": "Богарные пахотные земли",
+    "en": "Non-irrigated arable land",
+    "isForest": false
+  },
+  "2.1.1.2": {
+    "code": "2.1.1.2",
+    "pt": "Arrozais",
+    "ru": "Arrozais",
+    "en": "Arrozais",
+    "isForest": false
+  },
+  "2.2.1.1": {
+    "code": "2.2.1.1",
+    "pt": "Vinhas",
+    "ru": "Виноградники",
+    "en": "Vineyards",
+    "isForest": false
+  },
+  "2.2.2.1": {
+    "code": "2.2.2.1",
+    "pt": "Pomares em copa de baixa densidade",
+    "ru": "Традиционные сады низкой плотности (миндаль, инжир, каштан, черешня)",
+    "en": "Traditional low-density orchards (almond, fig, chestnut, cherry)",
+    "isForest": true
+  },
+  "2.2.2.2": {
+    "code": "2.2.2.2",
+    "pt": "Pomares em copa de alta densidade",
+    "ru": "Плодовые сады высокой плотности",
+    "en": "High-density fruit orchards",
+    "isForest": false
+  },
+  "2.2.2.3": {
+    "code": "2.2.2.3",
+    "pt": "Pomares em sebe",
+    "ru": "Интенсивные шпалерные сады",
+    "en": "Hedge fruit plantations",
+    "isForest": false
+  },
+  "2.2.3.1": {
+    "code": "2.2.3.1",
+    "pt": "Olival em copa de baixa densidade",
+    "ru": "Традиционные оливковые рощи",
+    "en": "Traditional olive groves",
+    "isForest": false
+  },
+  "2.2.3.2": {
+    "code": "2.2.3.2",
+    "pt": "Olival em copa de alta densidade",
+    "ru": "Интенсивные оливковые сады",
+    "en": "Intensive olive orchards",
+    "isForest": false
+  },
+  "2.2.3.3": {
+    "code": "2.2.3.3",
+    "pt": "Olival em sebe",
+    "ru": "Суперинтенсивные шпалерные оливковые посадки",
+    "en": "Super-intensive hedge olive plantations",
+    "isForest": false
+  },
+  "2.3.1.1": {
+    "code": "2.3.1.1",
+    "pt": "Culturas temporárias e/ou pastagens melhoradas associadas a vinha",
+    "ru": "Улучшенные сенокосы и пастбища",
+    "en": "Improved pastures and meadows",
+    "isForest": false
+  },
+  "2.3.1.2": {
+    "code": "2.3.1.2",
+    "pt": "Culturas temporárias e/ou pastagens melhoradas associadas a pomar",
+    "ru": "Естественные луговые пастбища",
+    "en": "Natural grasslands",
+    "isForest": false
+  },
+  "2.3.1.3": {
+    "code": "2.3.1.3",
+    "pt": "Culturas temporárias e/ou pastagens melhoradas associadas a olival",
+    "ru": "Culturas temporárias e/ou pastagens melhoradas associadas a olival",
+    "en": "Culturas temporárias e/ou pastagens melhoradas associadas a olival",
+    "isForest": false
+  },
+  "2.4.1.1": {
+    "code": "2.4.1.1",
+    "pt": "Agricultura e viveiros protegidos",
+    "ru": "Тепличные хозяйства и питомники",
+    "en": "Greenhouses and plant nurseries",
+    "isForest": false
+  },
+  "3.1.1.1": {
+    "code": "3.1.1.1",
+    "pt": "Pastagens melhoradas",
+    "ru": "Песчаные пляжи и приморские дюны",
+    "en": "Sandy beaches and coastal dunes",
+    "isForest": false
+  },
+  "3.1.2.1": {
+    "code": "3.1.2.1",
+    "pt": "Pastagens espontâneas",
+    "ru": "Pastagens espontâneas",
+    "en": "Pastagens espontâneas",
+    "isForest": false
+  },
+  "4.1.1.1": {
+    "code": "4.1.1.1",
+    "pt": "Superfícies agrossilvícolas de sobreiro",
+    "ru": "Монтадо пробкового дуба с пашней (агролесоводство)",
+    "en": "Arable agroforestry cork oak montado",
+    "isForest": true
+  },
+  "4.1.1.2": {
+    "code": "4.1.1.2",
+    "pt": "Superfícies agrossilvícolas de azinheira",
+    "ru": "Монтадо каменного дуба с пашней (агролесоводство)",
+    "en": "Arable agroforestry holm oak montado",
+    "isForest": true
+  },
+  "4.1.1.3": {
+    "code": "4.1.1.3",
+    "pt": "Superfícies agrossilvícolas de outros carvalhos",
+    "ru": "Дубравы других видов дуба с пашней (агролесоводство)",
+    "en": "Arable agroforestry other oaks",
+    "isForest": true
+  },
+  "4.1.1.4": {
+    "code": "4.1.1.4",
+    "pt": "Superfícies agrossilvícolas de outras folhosas",
+    "ru": "Лиственные насаждения с пашней (агролесоводство)",
+    "en": "Arable agroforestry other broadleaves",
+    "isForest": true
+  },
+  "4.1.2.1": {
+    "code": "4.1.2.1",
+    "pt": "Superfícies agrossilvícolas de pinheiro manso",
+    "ru": "Рощи сосны пинии с пашней (агролесоводство)",
+    "en": "Arable agroforestry stone pine",
+    "isForest": true
+  },
+  "4.1.2.2": {
+    "code": "4.1.2.2",
+    "pt": "Superfícies agrossilvícolas de outras resinosas",
+    "ru": "Хвойные насаждения с пашней (агролесоводство)",
+    "en": "Arable agroforestry other conifers",
+    "isForest": true
+  },
+  "4.2.1.1": {
+    "code": "4.2.1.1",
+    "pt": "Superfícies silvopastoris de sobreiro",
+    "ru": "Монтадо пробкового дуба с выпасом (сильвопастораль)",
+    "en": "Silvopastoral cork oak montado",
+    "isForest": true
+  },
+  "4.2.1.2": {
+    "code": "4.2.1.2",
+    "pt": "Superfícies silvopastoris de azinheira",
+    "ru": "Монтадо каменного дуба с выпасом (сильвопастораль)",
+    "en": "Silvopastoral holm oak montado",
+    "isForest": true
+  },
+  "4.2.1.3": {
+    "code": "4.2.1.3",
+    "pt": "Superfícies silvopastoris de outros carvalhos",
+    "ru": "Дубравы других видов дуба с выпасом (сильвопастораль)",
+    "en": "Silvopastoral other oaks",
+    "isForest": true
+  },
+  "4.2.1.4": {
+    "code": "4.2.1.4",
+    "pt": "Superfícies silvopastoris de outras folhosas",
+    "ru": "Лиственные насаждения с выпасом (сильвопастораль)",
+    "en": "Silvopastoral other broadleaves",
+    "isForest": true
+  },
+  "4.2.2.1": {
+    "code": "4.2.2.1",
+    "pt": "Superfícies silvopastoris de pinheiro manso",
+    "ru": "Рощи сосны пинии с выпасом (сильвопастораль)",
+    "en": "Silvopastoral stone pine",
+    "isForest": true
+  },
+  "4.2.2.2": {
+    "code": "4.2.2.2",
+    "pt": "Superfícies silvopastoris de outras resinosas",
+    "ru": "Хвойные насаждения с выпасом (сильвопастораль)",
+    "en": "Silvopastoral other conifers",
+    "isForest": true
+  },
+  "5.1.1.1": {
+    "code": "5.1.1.1",
+    "pt": "Florestas de sobreiro",
+    "ru": "Леса пробкового дуба (сомкнутые sobreirais)",
+    "en": "Cork oak closed forests",
+    "isForest": true
+  },
+  "5.1.1.2": {
+    "code": "5.1.1.2",
+    "pt": "Florestas de azinheira",
+    "ru": "Леса каменного дуба (azinhais)",
+    "en": "Holm oak closed forests",
+    "isForest": true
+  },
+  "5.1.1.3": {
+    "code": "5.1.1.3",
+    "pt": "Florestas de outros carvalhos",
+    "ru": "Дубравы черешчатого, пиренейского и португальского дубов",
+    "en": "Deciduous oak forests (pedunculate, Pyrenean, Portuguese)",
+    "isForest": true
+  },
+  "5.1.1.4": {
+    "code": "5.1.1.4",
+    "pt": "Florestas de castanheiro",
+    "ru": "Каштановые леса и рощи (soutos)",
+    "en": "Sweet chestnut forests & groves (soutos)",
+    "isForest": true
+  },
+  "5.1.1.5": {
+    "code": "5.1.1.5",
+    "pt": "Florestas de alfarrobeira",
+    "ru": "Леса и рощи рожкового дерева (alfarrobais)",
+    "en": "Carob tree forests and groves",
+    "isForest": true
+  },
+  "5.1.1.6": {
+    "code": "5.1.1.6",
+    "pt": "Florestas de eucalipto",
+    "ru": "Эвкалиптовые леса и плантации",
+    "en": "Eucalyptus forests & pulp plantations",
+    "isForest": true
+  },
+  "5.1.1.7": {
+    "code": "5.1.1.7",
+    "pt": "Florestas de acácias",
+    "ru": "Леса и заросли акаций",
+    "en": "Acacia stands",
+    "isForest": true
+  },
+  "5.1.1.8": {
+    "code": "5.1.1.8",
+    "pt": "Florestas de outras folhosas",
+    "ru": "Леса других лиственных пород (бук, береза, черешня, ясень)",
+    "en": "Other broadleaved forests (beech, birch, cherry, ash)",
+    "isForest": true
+  },
+  "5.1.2.1": {
+    "code": "5.1.2.1",
+    "pt": "Florestas de pinheiro bravo",
+    "ru": "Сосновые боры приморской сосны",
+    "en": "Maritime pine forests",
+    "isForest": true
+  },
+  "5.1.2.2": {
+    "code": "5.1.2.2",
+    "pt": "Florestas de pinheiro manso",
+    "ru": "Леса сосны пинии (итальянская кедровая сосна)",
+    "en": "Stone pine forests (umbrella pine)",
+    "isForest": true
+  },
+  "5.1.2.3": {
+    "code": "5.1.2.3",
+    "pt": "Florestas de outras resinosas",
+    "ru": "Леса других хвойных пород (кедры, пихты, кипарисы)",
+    "en": "Other conifer forests (cedar, cypress, fir)",
+    "isForest": true
+  },
+  "6.1.1.1": {
+    "code": "6.1.1.1",
+    "pt": "Matos",
+    "ru": "Кустарниковые заросли (маки, вересковые пустоши)",
+    "en": "Shrublands and Mediterranean maquis",
+    "isForest": false
+  },
+  "7.1.1.1": {
+    "code": "7.1.1.1",
+    "pt": "Praias, dunas e areais interiores",
+    "ru": "Внутренние пресноводные марши и болота",
+    "en": "Inland freshwater marshes",
+    "isForest": false
+  },
+  "7.1.1.2": {
+    "code": "7.1.1.2",
+    "pt": "Praias, dunas e areais costeiros",
+    "ru": "Praias, dunas e areais costeiros",
+    "en": "Praias, dunas e areais costeiros",
+    "isForest": false
+  },
+  "7.1.2.1": {
+    "code": "7.1.2.1",
+    "pt": "Espaços rochosos",
+    "ru": "Espaços rochosos",
+    "en": "Espaços rochosos",
+    "isForest": false
+  },
+  "7.1.3.1": {
+    "code": "7.1.3.1",
+    "pt": "Vegetação esparsa",
+    "ru": "Vegetação esparsa",
+    "en": "Vegetação esparsa",
+    "isForest": false
+  },
+  "8.1.1.1": {
+    "code": "8.1.1.1",
+    "pt": "Pauis e turfeiras",
+    "ru": "Соляные бассейны и солеварни",
+    "en": "Salinas and active salt pans",
+    "isForest": false
+  },
+  "8.1.2.1": {
+    "code": "8.1.2.1",
+    "pt": "Sapais",
+    "ru": "Sapais",
+    "en": "Sapais",
+    "isForest": false
+  },
+  "9.1.1.1": {
+    "code": "9.1.1.1",
+    "pt": "Cursos de água naturais",
+    "ru": "Реки и естественные водотоки",
+    "en": "Rivers and natural watercourses",
+    "isForest": false
+  },
+  "9.1.1.2": {
+    "code": "9.1.1.2",
+    "pt": "Cursos de água modificados ou artificializados",
+    "ru": "Искусственные каналы",
+    "en": "Canals and artificial water channels",
+    "isForest": false
+  },
+  "9.1.2.1": {
+    "code": "9.1.2.1",
+    "pt": "Lagos e lagoas interiores artificiais",
+    "ru": "Водохранилища и запруды",
+    "en": "Reservoirs and artificial dams",
+    "isForest": false
+  },
+  "9.1.2.2": {
+    "code": "9.1.2.2",
+    "pt": "Lagos e lagoas interiores naturais",
+    "ru": "Естественные пресноводные озера и лагуны",
+    "en": "Natural freshwater lakes and ponds",
+    "isForest": false
+  },
+  "9.1.2.3": {
+    "code": "9.1.2.3",
+    "pt": "Albufeiras de barragens",
+    "ru": "Albufeiras de barragens",
+    "en": "Albufeiras de barragens",
+    "isForest": false
+  },
+  "9.1.2.4": {
+    "code": "9.1.2.4",
+    "pt": "Albufeiras de represas ou de açudes",
+    "ru": "Albufeiras de represas ou de açudes",
+    "en": "Albufeiras de represas ou de açudes",
+    "isForest": false
+  },
+  "9.1.2.5": {
+    "code": "9.1.2.5",
+    "pt": "Charcas",
+    "ru": "Charcas",
+    "en": "Charcas",
+    "isForest": false
+  },
+  "9.2.1.1": {
+    "code": "9.2.1.1",
+    "pt": "Aquicultura",
+    "ru": "Прибрежные лагуны",
+    "en": "Coastal lagoons",
+    "isForest": false
+  },
+  "9.3.1.1": {
+    "code": "9.3.1.1",
+    "pt": "Salinas",
+    "ru": "Salinas",
+    "en": "Salinas",
+    "isForest": false
+  },
+  "9.3.2.1": {
+    "code": "9.3.2.1",
+    "pt": "Lagoas costeiras",
+    "ru": "Lagoas costeiras",
+    "en": "Lagoas costeiras",
+    "isForest": false
+  },
+  "9.3.3.1": {
+    "code": "9.3.3.1",
+    "pt": "Desembocaduras fluviais",
+    "ru": "Desembocaduras fluviais",
+    "en": "Desembocaduras fluviais",
+    "isForest": false
+  },
+  "9.3.4.1": {
+    "code": "9.3.4.1",
+    "pt": "Oceano",
+    "ru": "Океан и прибрежные морские воды",
+    "en": "Ocean and marine waters",
+    "isForest": false
+  }
+}

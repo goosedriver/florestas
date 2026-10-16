@@ -1,0 +1,187 @@
+# AGENTS.md — Developer & AI Agent Guidelines for Florestas de Portugal
+
+This document serves as the architectural specification, data integrity standard, and developer handbook for all human developers and AI coding agents working on the **Florestas de Portugal** codebase.
+
+---
+
+## 1. Project Overview & Purpose
+
+**Florestas de Portugal** is a standalone, client-side, zero-server web application (100% compatible with `file:///` local browsing as well as any static hosting) providing a rich, interactive, trilingual cartographic exploration of mainland Portugal's forests, tree species phenology (flowering and fruiting), and elevation-stratified autumn foliage dynamics.
+
+### Primary Objectives:
+- **Official Forest Cartography**: Render live WMS vector land-cover polygons directly from the Portuguese government Direção-Geral do Território (DGT) GeoServer without API keys or watermarks.
+- **Seasonal Phenology & Autumn Dynamics**: Track when trees flower, fruit, undergo foliar senescence (golden/amber peak), or enter winter rest (fallen leaves) across Portugal's distinct bioclimatic zones.
+- **Click-to-Inspect Land Parcels**: Enable users to click anywhere on mainland Portugal to query official DGT COS Level 4 cadastral/land-cover polygons via `GetFeatureInfo`, with full trilingual classification and clear identification of non-forest parcels (vineyards, urban, water, olive groves).
+- **Trilingual Parity**: Provide native, culturally accurate translations across Russian (`ru` - default), European Portuguese (`pt-PT`), and English (`en`).
+
+---
+
+## 2. Core Data Integrity Rules (Mandatory for All Future Agents)
+
+1. **Authentic, Recent Scientific Sources Only (2016–2026)**:
+   - Base all forest data, spatial classifications, and phenological calendars strictly on official and scientific authorities updated within the past 10 years:
+     - **DGT** (Direção-Geral do Território): COS 2025v1 Série 2, COS 2023v1 Série 2, CPV 2025–2026.
+     - **ICNF** (Instituto da Conservação da Natureza e das Florestas): 6.º Inventário Florestal Nacional (IFN6, 2019/2021).
+     - **Flora-On / Sociedade Portuguesa de Botânica**: Official Portuguese botanical phenology monographs.
+     - **iNaturalist**: Live geotagged field observations in Portugal (place_id: 7122).
+2. **Absolute Zero Data Fabrication (Honesty Principle)**:
+   - Never fabricate or guess phenological statuses or land-cover codes.
+   - If a phenological phase has **0 matching species** for a selected period (for example, `foliage_fallen` in mid-October when deciduous canopies are still golden/green), **explicitly show 0 species** and set the WMS CQL filter to `cos25v1_n4_c = 'NONE'`, explaining to the user in the `#active-layer-explainer` banner that leaves have not fallen yet, rather than falling back to unfiltered layers.
+3. **No General Scrubland in Forest Filters**:
+   - `6.1.1.1` (`Matos` / general Mediterranean maquis & treeless brush — ~1.5 million ha) must **never** be included in forest CQL filters (`FOREST_TYPE_CQL.all`, `deciduous`, `orchard_shrub`, etc.). It overwhelms the map and confuses users who are searching for true tree-covered woodland.
+4. **Full Trilingual Parity Across All Features**:
+   - Every UI string, species card, location profile, and DGT COS Level 4 land-cover translation must exist in `ru`, `pt`, and `en`.
+   - The default language is Russian (`state.lang = 'ru'`), with instant one-click switching to `pt` and `en`.
+
+---
+
+## 3. Architecture & File Structure
+
+The project is designed with a lightweight, dependency-free architecture relying only on Leaflet 1.9.4 from CDN:
+
+```
+c:\Users\alebedev\Documents\antigravity\Florestas\
+├── index.html       # HTML5 Semantic layout & DOM structure
+├── styles.css       # Botanical-cartographic styles, glassmorphism, responsive & zoom rules
+├── data.js          # Authoritative dataset (sources, species, locations, stats, COS dictionary)
+├── app.js           # State machine, Leaflet map management, CQL filters, events, inspector
+├── cos-dict.json    # Reference export of all 101 DGT COS Level 4 classes with translations
+└── AGENTS.md        # This specification file
+```
+
+### Detailed Component Roles:
+
+- **`index.html`**:
+  - Top header with trilingual language switcher (`ru`, `pt`, `en`) and official data badge.
+  - Sidebar:
+    - Time Machine calendar: Month dropdown (1–12) and Decade selector (`early` 1–10, `mid` 11–20, `late` 21–31) with dynamic season summary banner.
+    - Exploration Mode tabs: *Visão Geral* (`all`), *Trilhos de Outono* (`autumn_walk`), *Flor & Fruto* (`blooming_fruiting`).
+    - Forest Type filter pills: All, Eucalyptus, Pine, Deciduous, Montado, Almond Orchards.
+    - Phenology filter pills: All, Flowering, Fruiting, Golden Foliage, Fallen Leaves, Evergreen.
+    - Active Phenomenon breakdown card (`#card-active-phenomenon`): Live chips of blooming/fruiting/yellowing species for the selected decade.
+    - Specific Tree Species filter section (`#wms-panel`): Dropdown and quick pills for 1-click WMS CQL isolation.
+    - WMS layer toggle & live iNaturalist toggle.
+    - Search input & tabs (*Florestas & Trilhos*, *Guia de Espécies*, *Estatísticas ICNF*).
+  - Map Canvas (`<main class="map-container">`):
+    - Leaflet container (`#map`).
+    - Top status bar (`#map-status-bar`): Marker toggle button, base map switcher, WMS radar indicator, iNaturalist counter, map hint.
+    - Floating Active Layer & Phenomenon Explainer banner (`#active-layer-explainer`): Dynamic explanation of active polygons + reset button (`#btn-reset-filters`).
+    - Collapsible interactive cartographic legend (`#map-legend`).
+    - Floating parcel inspector drawer (`#parcel-inspector`): Displays Level 4 land-cover name, code, area in ha, GPS coordinates, nearest mountain/region, and forest/non-forest badge.
+  - Modals: Detail modal (`#modal-detail`) with phenology chart & trails, and sources modal (`#modal-sources`).
+
+- **`styles.css`**:
+  - Dark botanical palette (`--color-forest-900: #0d1e17`, `--color-forest-400: #52b788`, amber `#f59e0b`, rose `#f472b6`).
+  - **Zoom-Responsive Marker Classes** on `#map`:
+    - `.map-zoom-far` (`zoom <= 7`): Markers become sleek 24px circular pins showing emoji only (`.marker-pill-name` and `.marker-pill-event` set to `display: none !important;`). Hover triggers `.custom-leaflet-tooltip`. iNaturalist markers shrink to 10px dots.
+    - `.map-zoom-mid` (`zoom 8–9`): Displays emoji + short location name.
+    - `.map-zoom-close` (`zoom >= 10`): Displays full badge with event details and elevation.
+  - `.active-layer-explainer`: Glassmorphic floating card with amber/emerald accent borders, responsive positioning, and warning mode styles (`.warning-mode`).
+  - Inspector badges: `.inspector-badge.badge-forest` (emerald) vs `.inspector-badge.badge-nonforest` (amber).
+
+- **`data.js`**:
+  - Exports `FLORESTAS_DATA` to global scope (and `module.exports` for Node tests).
+  - Contains:
+    - `sources`: 5 official sources (DGT COS, DGT CPV, ICNF IFN6, Flora-On, iNaturalist).
+    - `wmsConfig`: Official GeoServer endpoint (`https://geo2.dgterritorio.gov.pt/geoserver/ows`), layer ID `COS-S2:cos2025v1-s2`.
+    - `species`: 16 core Portuguese tree and shrub taxa with exact `dgtCosCodes`, `inatTaxonId`, phenological calendars (`floweringMonths`, `fruitingMonths`, `autumnTiming`), and trilingual descriptions.
+    - `locations`: 36 verified forested serras, national/natural parks, and national forests with GPS coordinates, elevation, regional phenology, and verified walking trails.
+    - `regionalStats`: Forest distribution percentages from IFN6 (Norte, Centro, Lisboa e Vale do Tejo, Alentejo, Algarve).
+    - `cosN4Translations`: Complete dictionary of all 101 official DGT COS Level 4 classes (`1.1.1.1` to `9.3.4.1`) with `ru`, `pt`, `en`, and `isForest` flag.
+
+- **`app.js`**:
+  - State machine: `state.lang`, `state.month`, `state.decade`, `state.mode`, `state.forestType`, `state.phenoState`, `state.specificSpecies`, `state.wmsEnabled`, `state.markersVisible`, `state.inspectedParcel`.
+  - Base maps: Esri World Dark Gray Canvas (default), Esri World Topographic Map (`World_Topo_Map`), and Esri Satellite (`World_Imagery`) — all 100% free, keyless, watermark-free, and compatible with `file:///` (do NOT use `tile.openstreetmap.org`, as OSM blocks `file:///` requests lacking an HTTP `Referer` header with HTTP 403).
+  - DGT WMS integration: Real-time `setParams({ CQL_FILTER: cql, _t: Date.now() })` cache-busting.
+  - Filter coordination: Mutual reset between Forest Type, Phenology, Species, and Mode.
+  - `onMapClick(e)`: Issues WMS `GetFeatureInfo` in EPSG:4326/JSON to DGT GeoServer; extracts polygon GeoJSON and highlights it on map (`highlightParcelLayer`); resolves N4 code via `getParcelTranslation` and renders parcel in inspector.
+  - Real-time active layer explainer updater (`updateActiveLayerExplainer()`).
+  - Public interface exported on `window.florestasApp`.
+
+---
+
+## 4. DGT COS 2025 Série 2 (`COS-S2:cos2025v1-s2`) Reference Codes
+
+The official DGT COS Level 4 classification uses hierarchical codes (`Level 1 . Level 2 . Level 3 . Level 4`). Key forest and tree codes used across this codebase:
+
+| Code | Portuguese Label (DGT) | English Translation | Russian Translation | Forest? |
+|---|---|---|---|:---:|
+| `5.1.1.1` | Florestas de sobreiro | Cork oak closed forests | Леса пробкового дуба (сомкнутые sobreirais) | Yes |
+| `5.1.1.2` | Florestas de azinheira | Holm oak closed forests | Леса каменного дуба (сомкнутые azinhais) | Yes |
+| `5.1.1.3` | Florestas de outros carvalhos | Deciduous oak forests (*Q. robur, pyrenaica, faginea*) | Дубравы черешчатого, пиренейского и португальского дубов | Yes |
+| `5.1.1.4` | Florestas de castanheiro | Sweet chestnut forests & groves (*soutos*) | Каштановые леса и рощи (*soutos*) | Yes |
+| `5.1.1.5` | Florestas de alfarrobeira | Carob tree woodlands | Рожковые рощи (*alfarrobeiras*) | Yes |
+| `5.1.1.6` | Florestas de eucalipto | Eucalyptus forests & pulp plantations | Эвкалиптовые леса и плантации | Yes |
+| `5.1.1.7` | Florestas de acácias e outras infestantes | Invasive acacia and exotic broadleaf stands | Насаждения акаций и инвазивных древесных пород | Yes |
+| `5.1.1.8` | Florestas de outras folhosas | Other broadleaf forests (birch, poplars, ash, willow) | Березовые, ясеневые, ольховые и прочие широколиственные леса | Yes |
+| `5.1.2.1` | Florestas de pinheiro bravo | Maritime pine forests (*Pinus pinaster*) | Леса приморской сосны (*pinheiro-bravo*) | Yes |
+| `5.1.2.2` | Florestas de pinheiro manso | Stone / umbrella pine forests (*Pinus pinea*) | Леса средиземноморской пинии (*pinheiro-manso*) | Yes |
+| `5.1.2.3` | Florestas de outras resinosas | Other coniferous forests (cypress, cedar, douglas-fir) | Леса прочих хвойных пород (кипарисы, кедры, псевдотсуга) | Yes |
+| `4.1.1.x` | Montados com sobreiro / azinheira | Silvopastoral montado with cork/holm oak (density >10%) | Агролесоводческий монтаду с пробковым/каменным дубом | Yes |
+| `4.2.1.x` | Sistemas agroflorestais de folhosas | Deciduous broadleaf agroforestry systems | Агролесоводческие системы широколиственных пород | Yes |
+| `2.2.2.1` | Pomares de amendoeira | Almond orchards | Миндальные сады | Yes |
+| `2.2.2.2` | Pomares de castanheiro para fruto | Sweet chestnut orchards for nut harvesting | Плодовые каштановые сады | Yes |
+| `2.2.2.3` | Outros pomares de frutos de casca rija | Other nut orchards (walnut, hazelnut) | Сады грецкого ореха и фундука | Yes |
+| `6.1.1.1` | Matos | Shrublands, Mediterranean maquis & heath | Кустарниковые заросли (маки, вересковые пустоши) | **No** (Scrub) |
+| `2.2.1.1` | Vinhas | Vineyards | Виноградники | **No** (Agri) |
+| `2.2.3.1` | Olivais | Olive groves | Оливковые рощи | **No** (Agri) |
+
+### Important Filter Constraints:
+- **`FOREST_TYPE_CQL.all`**:
+  ```sql
+  cos25v1_n1_c = '5' OR cos25v1_n1_c = '4' OR cos25v1_n4_c IN ('2.2.2.1', '2.2.2.2', '2.2.2.3', '5.1.1.5')
+  ```
+- **`FOREST_TYPE_CQL.deciduous`**:
+  ```sql
+  cos25v1_n4_c IN ('5.1.1.3', '5.1.1.4', '5.1.1.8', '4.1.1.3', '4.1.1.4', '4.2.1.3', '4.2.1.4')
+  ```
+- **`FOREST_TYPE_CQL.eucalyptus`**: `cos25v1_n4_c = '5.1.1.6'`
+- **`FOREST_TYPE_CQL.pine`**: `cos25v1_n4_c IN ('5.1.2.1', '5.1.2.2', '5.1.2.3', '4.1.2.1', '4.1.2.2', '4.2.2.1', '4.2.2.2')`
+- **`FOREST_TYPE_CQL.montado`**: `cos25v1_n4_c IN ('5.1.1.1', '5.1.1.2', '4.1.1.1', '4.1.1.2', '4.2.1.1', '4.2.1.2')`
+- **`FOREST_TYPE_CQL.orchard_shrub`**: `cos25v1_n4_c IN ('5.1.1.5', '2.2.2.1', '2.2.2.2', '2.2.2.3')`
+
+---
+
+## 5. Verification & Testing Guidelines
+
+Before committing or completing any modifications, always execute an automated verification check using Node.js to validate:
+1. JavaScript syntax of `data.js` and `app.js`.
+2. Completeness and validity of `DATA.cosN4Translations` (101 codes).
+3. Presence of all essential DOM elements and IDs in `index.html`.
+4. Absence of `6.1.1.1` in forest CQL queries.
+5. Presence of required responsive and zoom CSS rules in `styles.css`.
+
+### Running Verification Script:
+
+Execute the following command in PowerShell:
+
+```powershell
+node -e "
+const fs = require('fs');
+console.log('Testing data.js syntax...');
+const data = require('./data.js');
+console.log('✓ data.js OK. Species:', data.species.length, 'Locations:', data.locations.length, 'COS Translations:', Object.keys(data.cosN4Translations).length);
+
+console.log('Testing app.js syntax...');
+const appJs = fs.readFileSync('app.js', 'utf8');
+new Function(appJs);
+console.log('✓ app.js OK');
+
+console.log('Checking 6.1.1.1 exclusion...');
+if (appJs.includes(\"5.1.1.5', '6.1.1.1'\") || appJs.includes(\"2.2.2.3', '6.1.1.1'\")) {
+  throw new Error('6.1.1.1 Matos found in forest filters!');
+}
+console.log('✓ 6.1.1.1 Matos excluded from forest filters');
+
+console.log('Checking DOM IDs in index.html...');
+const html = fs.readFileSync('index.html', 'utf8');
+['active-layer-explainer', 'btn-reset-filters', 'parcel-inspector', 'inspector-status-badge', 'val-parcel-name'].forEach(id => {
+  if (!html.includes('id=\"' + id + '\"')) throw new Error('Missing ID: ' + id);
+});
+console.log('✓ Critical DOM IDs present');
+
+console.log('ALL INTEGRITY CHECKS PASSED');
+"
+```
+
+If all checks pass, the repository is verified and ready for deployment.
