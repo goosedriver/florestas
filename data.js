@@ -472,6 +472,7 @@
         "en": "Heritage deciduous tree celebrated in northern mountains (Vinhais, Padrela) and central ranges (Estrela, Marvão). Heart of the Magusto roasted chestnut festival. Radiant golden-bronze autumn canopy."
       },
       "phenology": {
+        "leafOutMonth": 4,
         "floweringMonths": [
           6,
           7
@@ -573,6 +574,7 @@
         "en": "Native montane oak inhabiting Serra da Estrela, Montesinho, and Peneda-Gerês. Exhibits marcescence: deeply lobed leaves turn amber-copper in autumn and cling to branches into winter."
       },
       "phenology": {
+        "leafOutMonth": 5,
         "floweringMonths": [
           5,
           6
@@ -677,6 +679,7 @@
         "en": "Magnificent Atlantic oak thriving across humid Northwestern Portugal (Minho and Peneda-Gerês National Park, such as Mata da Albergaria). Forms prime native climax temperate rainforests."
       },
       "phenology": {
+        "leafOutMonth": 4,
         "floweringMonths": [
           4,
           5
@@ -781,6 +784,7 @@
         "en": "Sub-Mediterranean marcescent oak thriving on limestone soils of Central Portugal (Aire e Candeeiros, Sicó, Sintra, Buçaco). Dentate leaves turn yellow-ochre in late autumn."
       },
       "phenology": {
+        "leafOutMonth": 4,
         "floweringMonths": [
           3,
           4,
@@ -886,6 +890,7 @@
         "en": "The crown jewel of autumn foliage in Serra da Estrela (Manteigas, São Lourenço Beech Forest, and trail PR13 MTG - Rota das Faias). Planted in the early 20th century, forming Portugal most celebrated golden-copper cathedral canopy."
       },
       "phenology": {
+        "leafOutMonth": 4,
         "floweringMonths": [
           4,
           5
@@ -989,6 +994,7 @@
         "en": "Native birch of high-elevation riparian galleries and mountain slopes (Gerês, Estrela, Montesinho, Alvão). Silvery bark and radiant lemon-yellow autumn foliage."
       },
       "phenology": {
+        "leafOutMonth": 4,
         "floweringMonths": [
           4,
           5
@@ -1078,6 +1084,7 @@
       "inatTaxonId": 82689,
       "category": "orchard_shrub",
       "leafType": "evergreen",
+      "cosRole": "associated",
       "areaHa": 16000,
       "sharePct": 0.5,
       "color": "#dc2626",
@@ -1134,6 +1141,7 @@
       "inatTaxonId": 69936,
       "category": "orchard_shrub",
       "leafType": "deciduous",
+      "cosRole": "associated",
       "areaHa": 35000,
       "sharePct": null,
       "color": "#ec4899",
@@ -1149,6 +1157,7 @@
         "en": "Celebrated harbinger of spring in Douro Superior (Vila Nova de Foz Côa, Barca d’Alva) and the Algarve Barrocal. Whitish-pink blossoms carpet valleys during late winter."
       },
       "phenology": {
+        "leafOutMonth": 3,
         "floweringMonths": [
           1,
           2,
@@ -1253,6 +1262,7 @@
         "en": "Icon of the Cova da Beira valley and slopes of Serra da Gardunha (Fundão). Snowy white blooms blanket the hills in April, yielding renowned Fundão cherries in June and blazing crimson-orange autumn foliage."
       },
       "phenology": {
+        "leafOutMonth": 4,
         "floweringMonths": [
           3,
           4
@@ -1397,6 +1407,7 @@
       "inatTaxonId": 56038,
       "category": "orchard_shrub",
       "leafType": "deciduous",
+      "cosRole": "associated",
       "areaHa": null,
       "sharePct": null,
       "color": "#b91c1c",
@@ -1416,6 +1427,7 @@
         "en": "Native deciduous spiny shrub or small tree forming hedgerows and forest understorey. Showy fragrant spring blossom followed by brilliant scarlet berries in autumn."
       },
       "phenology": {
+        "leafOutMonth": 3,
         "floweringMonths": [
           4,
           5
@@ -1836,7 +1848,7 @@
       "lng": -8.5583,
       "radiusKm": 6,
       "elevationM": 902,
-      "region": "Alentejo",
+      "region": "Algarve",
       "autumnTimingZone": "mid_mountain",
       "dominantCategory": "orchard_shrub",
       "categories": [
@@ -3270,7 +3282,9 @@
 
     var loc = typeof locationId === 'string' ? DATA.getLocationById(locationId) : locationId;
     var zone = 'mid_mountain';
-    if (loc && loc.autumnTimingZone) {
+    if (typeof locationId === 'string' && DATA.AUTUMN_ZONES.indexOf(locationId) !== -1) {
+      zone = locationId;
+    } else if (loc && loc.autumnTimingZone) {
       zone = loc.autumnTimingZone;
     } else if (loc && loc.elevationM) {
       if (loc.elevationM >= 900) zone = 'high_mountain';
@@ -3291,7 +3305,9 @@
           statusKey = zoneFoliage[m];
         } else {
           var mNum = parseInt(m, 10);
-          if (mNum >= 3 && mNum <= 9) statusKey = 'green';
+          // Branches stay bare in early spring until the species' leaf-out month
+          var leafOut = sp.phenology.leafOutMonth || 3;
+          if (mNum >= 3 && mNum <= 9) statusKey = mNum < leafOut ? 'fallen' : 'green';
           else if (mNum === 12 || mNum === 1 || mNum === 2) statusKey = 'fallen';
         }
       }
@@ -3314,6 +3330,46 @@
         en: (DATA.i18n && DATA.i18n.en && DATA.i18n.en.foliageStates && DATA.i18n.en.foliageStates[statusKey]) || statusKey
       }
     };
+  };
+
+  DATA.AUTUMN_ZONES = ['high_mountain', 'mid_mountain', 'lowland_coastal', 'south'];
+  DATA.FOLIAGE_RANK = { peak_yellow: 5, yellowing: 4, falling: 3, fallen: 2, green: 1 };
+
+  // Nationwide foliage status of a species. The COS WMS layer carries no elevation, so a
+  // country-wide view must look at every altitude zone instead of silently assuming one.
+  // Returns the most advanced autumn state found in any zone (same ranking as map markers),
+  // plus `statuses` (every state present somewhere) and `byZone` for detailed display.
+  DATA.getNationalAutumnStatus = function (speciesId, periodKey) {
+    var sp = typeof speciesId === 'string' ? DATA.getSpeciesById(speciesId) : speciesId;
+    if (!sp) return null;
+    if (sp.leafType === 'evergreen') {
+      var ev = DATA.getAutumnStatus(sp, null, periodKey);
+      ev.statuses = ['evergreen'];
+      ev.byZone = [];
+      return ev;
+    }
+
+    var best = null;
+    var statuses = [];
+    var byZone = DATA.AUTUMN_ZONES.map(function (zone) {
+      var st = DATA.getAutumnStatus(sp, zone, periodKey);
+      if (statuses.indexOf(st.status) === -1) statuses.push(st.status);
+      if (!best || (DATA.FOLIAGE_RANK[st.status] || 0) > (DATA.FOLIAGE_RANK[best.status] || 0)) {
+        best = { status: st.status, color: st.color, label: st.label, zone: zone };
+      }
+      return { zone: zone, status: st.status, label: st.label };
+    });
+
+    best.statuses = statuses;
+    best.byZone = byZone;
+    return best;
+  };
+
+  // Species whose `cosRole` is 'associated' have no COS class of their own (understory shrubs,
+  // orchard crops that COS does not separate). Their codes describe typical habitat only and
+  // must not drive phenology-state polygon filters.
+  DATA.isCosMappable = function (sp) {
+    return !!(sp && sp.dgtCosCodes && sp.dgtCosCodes.length && sp.cosRole !== 'associated');
   };
 
   DATA.getPhenologyByMonth = function (monthNumber) {

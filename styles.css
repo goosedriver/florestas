@@ -793,7 +793,8 @@ input:checked + .slider-round:before {
   pointer-events: none;
 }
 
-#input-search {
+#input-search,
+#input-min-search {
   width: 100%;
   background: var(--bg-dark-inset);
   border: 1px solid var(--border-card);
@@ -805,7 +806,8 @@ input:checked + .slider-round:before {
   transition: border-color var(--transition-fast);
 }
 
-#input-search:focus {
+#input-search:focus,
+#input-min-search:focus {
   border-color: var(--color-forest-400);
 }
 
@@ -2411,45 +2413,557 @@ input:checked + .slider-round:before {
   }
 }
 
+/* ==========================================================================
+   Forests / Minerals Map Mode
+   ========================================================================== */
+
+.map-mode-switch {
+  display: flex;
+  background: var(--bg-dark-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius-full);
+  padding: 3px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.map-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 6px 14px;
+  border-radius: var(--border-radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.map-mode-btn:hover {
+  color: var(--text-main);
+}
+
+.map-mode-btn.active[data-map-mode="forests"] {
+  background: var(--color-forest-700);
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+.map-mode-btn.active[data-map-mode="minerals"] {
+  background: #0f766e;
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+/* In minerals mode only the minerals panel stays in the sidebar */
+.map-mode-minerals .sidebar-scrollable > :not(#minerals-panel),
+.map-mode-minerals #map-legend,
+.map-mode-minerals #btn-toggle-markers,
+.map-mode-minerals .wms-active-indicator,
+.map-mode-minerals .inat-live-indicator,
+.map-mode-minerals .map-hint-text,
+.map-mode-minerals .status-bar-pill .divider-v {
+  display: none !important;
+}
+
+.map-mode-minerals .active-layer-explainer {
+  border-color: rgba(45, 212, 191, 0.45);
+}
+
+.minerals-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.minerals-panel.hidden {
+  display: none;
+}
+
+.min-layer-btn .count-badge,
+.min-group-btn .count-badge {
+  margin-left: auto;
+}
+
+.min-layer-btn:not(.active) {
+  opacity: 0.55;
+}
+
+.min-search-wrap {
+  margin-top: 0.75rem;
+}
+
+.min-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+#list-minerals {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.geo-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  text-align: left;
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-dark-inset);
+  border: 1px solid var(--border-subtle);
+  transition: border-color var(--transition-fast);
+}
+
+.geo-list-item:hover {
+  border-color: rgba(45, 212, 191, 0.5);
+}
+
+.geo-list-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+}
+
+.geo-list-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.geo-list-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.geo-list-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.min-list-more,
+.min-source-note {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.6rem;
+  line-height: 1.45;
+}
+
+.geo-popup {
+  min-width: 200px;
+  font-size: 0.78rem;
+}
+
+.geo-pop-type {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.geo-pop-name {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 2px 0 6px;
+  color: var(--color-parchment-100);
+}
+
+.geo-pop-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.geo-pop-row span {
+  color: var(--text-muted);
+}
+
+.geo-pop-row strong {
+  text-align: right;
+  font-weight: 500;
+}
+
+.geo-pop-coords {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.geo-pop-warning {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fcd34d;
+  font-size: 0.7rem;
+}
+
+.geo-pop-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 8px;
+}
+
+.geo-pop-links a {
+  color: #5eead4;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   Mobile layout (≤768px): full-screen map + draggable bottom sheet
+   Sheet states set by app.js on #sidebar: .sheet-peek (default), .sheet-half, .sheet-full.
+   --sheet-peek is measured at runtime so the date pickers stay visible when collapsed.
+   ========================================================================== */
+
+.sheet-handle {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  :root {
+    --header-height: 52px;
+    --sheet-peek: 150px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* --- Header: one compact row, nothing overflowing --- */
+  .app-header {
+    height: calc(var(--header-height) + var(--safe-top));
+    padding: var(--safe-top) 10px 0;
+    gap: 8px;
+  }
+
+  .header-brand-wrap {
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
   .mobile-toggle-btn {
-    display: flex;
+    display: none;
   }
 
-  .sidebar {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 85%;
-    max-width: 380px;
-    transform: translateX(-100%);
-    transition: transform var(--transition-normal);
+  .brand-crest svg {
+    width: 28px;
+    height: 28px;
   }
 
-  .sidebar.mobile-open {
-    transform: translateX(0);
+  .app-title {
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .map-legend {
-    width: calc(100vw - 32px);
-    left: 16px;
-    bottom: 16px;
+  .app-subtitle {
+    display: none;
   }
 
-  .parcel-inspector {
-    width: calc(100vw - 32px);
-    right: 16px;
-    bottom: 16px;
+  .header-actions {
+    gap: 0.5rem;
+    flex-shrink: 0;
   }
 
-  .active-layer-explainer {
-    max-width: calc(100vw - 32px);
-    right: 16px;
-    top: 56px;
+  .data-badge-container {
+    padding: 0;
+    border: none;
+    background: none;
   }
 
+  .data-badge-container .live-dot,
+  #txt-data-sources {
+    display: none;
+  }
+
+  .btn-sources {
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--bg-dark-inset);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .lang-btn {
+    padding: 6px 8px;
+    min-height: 30px;
+  }
+
+  /* Forests / Minerals switch: icons only, always visible in the header */
+  .map-mode-btn {
+    padding: 5px 10px;
+    min-height: 32px;
+  }
+
+  .map-mode-label {
+    display: none;
+  }
+
+  .map-mode-emoji {
+    font-size: 1rem;
+  }
+
+  #min-layer-toggles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  #min-layer-toggles .forest-filter-btn {
+    gap: 0.4rem;
+    padding: 6px 8px;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  /* --- Map fills everything below the header --- */
+  .app-layout {
+    height: calc(100vh - var(--header-height) - var(--safe-top));
+    height: calc(100dvh - var(--header-height) - var(--safe-top));
+  }
+
+  /* Pinch-zoom replaces the +/- buttons on touch screens */
+  .leaflet-control-zoom {
+    display: none;
+  }
+
+  .leaflet-control-attribution {
+    font-size: 9px;
+    max-width: 60vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: calc(var(--sheet-peek) + 2px) !important;
+  }
+
+  /* --- Status chips: one horizontally scrollable row --- */
+  .map-status-bar {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+  }
+
+  .status-bar-pill {
+    gap: 0.4rem;
+    padding: 4px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .status-bar-pill::-webkit-scrollbar {
+    display: none;
+  }
+
+  .status-bar-pill .divider-v,
   .status-bar-pill .map-hint-text {
+    display: none;
+  }
+
+  .status-pill-btn {
+    flex-shrink: 0;
+    min-height: 32px;
+    white-space: nowrap;
+  }
+
+  .wms-active-indicator,
+  .inat-live-indicator {
+    flex-shrink: 0;
+    padding: 0 6px;
+  }
+
+  /* --- Explainer: one-line summary, tap to expand --- */
+  .active-layer-explainer {
+    top: 56px;
+    left: 8px;
+    right: 8px;
+    max-width: none;
+    padding: 8px 10px;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .active-layer-explainer .explainer-icon {
+    font-size: 1.1rem;
+  }
+
+  .active-layer-explainer .explainer-title {
+    font-size: 0.82rem;
+  }
+
+  .active-layer-explainer:not(.expanded) .explainer-desc,
+  .active-layer-explainer:not(.expanded) .explainer-badge {
+    display: none;
+  }
+
+  .explainer-reset-btn {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  /* --- Bottom sheet (the desktop sidebar) --- */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: calc(100dvh - var(--header-height) - var(--safe-top) - 12px);
+    border-right: none;
+    border-top: 1px solid var(--border-card);
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.55);
+    z-index: 900;
+    transform: translateY(calc(100% - var(--sheet-peek) - var(--safe-bottom)));
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+
+  .sidebar.sheet-half {
+    transform: translateY(45%);
+  }
+
+  .sidebar.sheet-full {
+    transform: translateY(0);
+  }
+
+  .sidebar.sheet-dragging {
+    transition: none;
+  }
+
+  .sheet-handle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 26px;
+    flex-shrink: 0;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .sheet-grip {
+    width: 42px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--border-card-active, rgba(255, 255, 255, 0.3));
+  }
+
+  .sidebar-scrollable {
+    padding: 0 12px calc(20px + var(--safe-bottom));
+    gap: 0.85rem;
+    overscroll-behavior: contain;
+  }
+
+  /* Collapsed sheet: content must not scroll under the user's thumb */
+  .sidebar:not(.sheet-half):not(.sheet-full) .sidebar-scrollable {
+    overflow: hidden;
+  }
+
+  .date-card .card-header-flex {
+    gap: 8px;
+  }
+
+  #txt-date-label {
+    font-size: 0.8rem;
+  }
+
+  /* iOS zooms into inputs under 16px */
+  input,
+  select,
+  .custom-select {
+    font-size: 16px;
+  }
+
+  .custom-select {
+    min-height: 40px;
+  }
+
+  .forest-filter-btn,
+  .pheno-filter-btn,
+  .mode-tab,
+  .subtab-btn {
+    min-height: 40px;
+  }
+
+  /* --- Legend: small round button above the sheet, expands into a panel --- */
+  .map-legend {
+    left: auto;
+    right: 8px;
+    bottom: calc(var(--sheet-peek) + var(--safe-bottom) + 12px);
+    width: calc(100vw - 16px);
+    max-height: 55vh;
+    overflow-y: auto;
+    transition: none;
+  }
+
+  .map-legend.collapsed {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .map-legend.collapsed .legend-header {
+    padding: 0;
+    height: 44px;
+    justify-content: center;
+  }
+
+  .map-legend.collapsed .legend-title,
+  .map-legend.collapsed .btn-legend-toggle {
+    display: none;
+  }
+
+  /* --- Parcel inspector: card docked just above the sheet --- */
+  .parcel-inspector {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    bottom: calc(var(--sheet-peek) + var(--safe-bottom) + 12px);
+    z-index: 950;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  /* --- Modals become full-width bottom sheets --- */
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-dialog,
+  .modal-dialog-lg {
+    max-width: 100%;
+    max-height: calc(100dvh - var(--safe-top) - 24px);
+    border-radius: 18px 18px 0 0;
+    padding-bottom: var(--safe-bottom);
+  }
+}
+
+@media (max-width: 380px) {
+  .app-title {
+    font-size: 0.95rem;
+  }
+
+  .brand-crest {
     display: none;
   }
 }

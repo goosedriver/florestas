@@ -46,6 +46,8 @@ c:\Users\alebedev\Documents\antigravity\Florestas\
 ├── data.js          # Authoritative dataset (sources, species, locations, stats, COS dictionary)
 ├── app.js           # State machine, Leaflet map management, CQL filters, events, inspector
 ├── cos-dict.json    # Reference export of all 101 DGT COS Level 4 classes with translations
+├── geo-data.js      # GENERATED snapshot for Minerals mode (window.FLORESTAS_GEO) — do not hand-edit
+├── scripts/fetch-geodata.mjs  # Regenerates geo-data.js from LNEG + OpenStreetMap
 └── AGENTS.md        # This specification file
 ```
 
@@ -56,7 +58,7 @@ c:\Users\alebedev\Documents\antigravity\Florestas\
   - Sidebar:
     - Time Machine calendar: Month dropdown (1–12) and Decade selector (`early` 1–10, `mid` 11–20, `late` 21–31) with dynamic season summary banner.
     - Exploration Mode tabs: *Visão Geral* (`all`), *Trilhos de Outono* (`autumn_walk`), *Flor & Fruto* (`blooming_fruiting`).
-    - Forest Type filter pills: All, Eucalyptus, Pine, Deciduous, Montado, Almond Orchards.
+    - Forest Type filter pills: All, Eucalyptus, Pine, Deciduous, Montado, Orchards & Carob.
     - Phenology filter pills: All, Flowering, Fruiting, Golden Foliage, Fallen Leaves, Evergreen.
     - Active Phenomenon breakdown card (`#card-active-phenomenon`): Live chips of blooming/fruiting/yellowing species for the selected decade.
     - Specific Tree Species filter section (`#wms-panel`): Dropdown and quick pills for 1-click WMS CQL isolation.
@@ -100,6 +102,17 @@ c:\Users\alebedev\Documents\antigravity\Florestas\
 
 ---
 
+## 3b. Minerals Mode (Forests ⇄ Minerals switch)
+
+The header switch (`.map-mode-btn`, `setMapMode()` in app.js) swaps the forest layers (DGT WMS, location markers, iNaturalist, parcel inspector) for a minerals view drawn from `geo-data.js`:
+
+- **Mineral occurrences** — LNEG **CRM2023** "Depósitos de Matérias-Primas Críticas" (`https://sig.lneg.pt/server/rest/services/CRM2023/MapServer`, point layers 7 = critical, 6 = critical & strategic, 5 = strategic), built from SIORMINP records, CC BY 4.0. Fields kept: name, SIORMINP id, substances (element symbols / PT mineral names), size class, genesis, SIORMINP record link. It covers EU critical/strategic raw materials only — say so in the UI. The full SIORMINP service (`OcorrenciasMinerais/MapServer`, 9 commodity-group layers, with municipality/district) is the preferred upgrade, but its query endpoint was timing out on 2026-10-16.
+- Raw attribute values are translated through `MIN_VALUE_I18N` in app.js (pt = LNEG original wording); add new values there when a refresh introduces them.
+- **Caves, mines, abandoned mines** — OpenStreetMap via Overpass (`natural=cave_entrance`, `man_made=mineshaft|adit`, `historic=mine`, `abandoned:/disused:` prefixes), ODbL. Mines without an abandoned/disused/historic tag are labelled "status unknown" — never assume they are active.
+- Both live services are slow or rate-limited and `file:///` cannot fetch JSON, so data is **snapshotted**: `node scripts/fetch-geodata.mjs` (or `--osm-only` to keep the LNEG part). Record the snapshot dates; the UI shows them.
+- Mindat (`mindat.org/loc-14425.html`) has no keyless API and sits behind Cloudflare: use it only as an outbound search link, never as a scraped source.
+- Popups for caves and mines must keep the safety warning.
+
 ## 4. DGT COS 2025 Série 2 (`COS-S2:cos2025v1-s2`) Reference Codes
 
 The official DGT COS Level 4 classification uses hierarchical codes (`Level 1 . Level 2 . Level 3 . Level 4`). Key forest and tree codes used across this codebase:
@@ -117,19 +130,26 @@ The official DGT COS Level 4 classification uses hierarchical codes (`Level 1 . 
 | `5.1.2.1` | Florestas de pinheiro bravo | Maritime pine forests (*Pinus pinaster*) | Леса приморской сосны (*pinheiro-bravo*) | Yes |
 | `5.1.2.2` | Florestas de pinheiro manso | Stone / umbrella pine forests (*Pinus pinea*) | Леса средиземноморской пинии (*pinheiro-manso*) | Yes |
 | `5.1.2.3` | Florestas de outras resinosas | Other coniferous forests (cypress, cedar, douglas-fir) | Леса прочих хвойных пород (кипарисы, кедры, псевдотсуга) | Yes |
-| `4.1.1.x` | Montados com sobreiro / azinheira | Silvopastoral montado with cork/holm oak (density >10%) | Агролесоводческий монтаду с пробковым/каменным дубом | Yes |
-| `4.2.1.x` | Sistemas agroflorestais de folhosas | Deciduous broadleaf agroforestry systems | Агролесоводческие системы широколиственных пород | Yes |
-| `2.2.2.1` | Pomares de amendoeira | Almond orchards | Миндальные сады | Yes |
-| `2.2.2.2` | Pomares de castanheiro para fruto | Sweet chestnut orchards for nut harvesting | Плодовые каштановые сады | Yes |
-| `2.2.2.3` | Outros pomares de frutos de casca rija | Other nut orchards (walnut, hazelnut) | Сады грецкого ореха и фундука | Yes |
+| `4.1.x.x` | Superfícies agrossilvícolas de … | Agro-silvicultural systems (trees over crops): cork, holm, other oaks, other broadleaf, stone pine, other conifers | Агролесоводство (деревья над пашней) | Yes |
+| `4.2.x.x` | Superfícies silvopastoris de … | Silvopastoral systems (trees over pasture) — the classic montado for `.1.1`/`.1.2` | Сильвопастораль (деревья над пастбищем), классический монтаду | Yes |
+| `2.2.2.1` | Pomares em copa de baixa densidade | Low-density (traditional) orchards — any crop | Сады низкой плотности (любые культуры) | Yes (traditional) |
+| `2.2.2.2` | Pomares em copa de alta densidade | High-density orchards — any crop | Сады высокой плотности | **No** (Agri) |
+| `2.2.2.3` | Pomares em sebe | Hedge orchards — any crop | Шпалерные сады | **No** (Agri) |
 | `6.1.1.1` | Matos | Shrublands, Mediterranean maquis & heath | Кустарниковые заросли (маки, вересковые пустоши) | **No** (Scrub) |
 | `2.2.1.1` | Vinhas | Vineyards | Виноградники | **No** (Agri) |
-| `2.2.3.1` | Olivais | Olive groves | Оливковые рощи | **No** (Agri) |
+| `2.2.3.x` | Olival em copa de baixa / alta densidade / em sebe | Olive groves | Оливковые рощи | **No** (Agri) |
+
+> **Verified against the live server** (`GetLegendGraphic&FORMAT=application/json` on `COS-S2:cos2025v1-s2`, 2026-10-16). COS 2.2.2.x are orchard *density/form* classes, **not crop types** — COS cannot isolate almond, chestnut or nut orchards. Re-check labels against that legend rather than guessing.
+
+### Species ↔ COS mapping rules:
+- Species with `cosRole: 'associated'` (strawberry tree, hawthorn, almond) have no COS class of their own; their `dgtCosCodes` are typical habitat only. They must not drive phenology-state polygon filters (`DATA.isCosMappable`).
+- COS has no elevation, so nationwide phenology filters use `DATA.getNationalAutumnStatus` (a species matches if the phase occurs in any altitude zone). Location markers use the location's own zone.
+- `phenology.leafOutMonth` keeps deciduous species bare in early spring until leaf-out.
 
 ### Important Filter Constraints:
 - **`FOREST_TYPE_CQL.all`**:
   ```sql
-  cos25v1_n1_c = '5' OR cos25v1_n1_c = '4' OR cos25v1_n4_c IN ('2.2.2.1', '2.2.2.2', '2.2.2.3', '5.1.1.5')
+  cos25v1_n1_c = '5' OR cos25v1_n1_c = '4' OR cos25v1_n4_c = '2.2.2.1'
   ```
 - **`FOREST_TYPE_CQL.deciduous`**:
   ```sql

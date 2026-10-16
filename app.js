@@ -36,7 +36,15 @@
     baseMapIndex: 0, // 0: Esri Dark Gray, 1: OSM, 2: Esri Satellite
     selectedLocation: null,
     selectedSpecies: null,
-    inspectedParcel: null
+    inspectedParcel: null,
+    mapMode: 'forests', // 'forests' or 'minerals'
+    minerals: {
+      layers: { minerals: true, cave: true, mine: true, mine_abandoned: true },
+      group: 'all',
+      substance: 'all',
+      sort: 'name',
+      query: ''
+    }
   };
 
   // Map and layer references
@@ -74,7 +82,7 @@
       forestPine: 'Сосновые (890 тыс. га)',
       forestDeciduous: 'Листопадные дубравы & каштаны',
       forestMontado: 'Монтадо (пробковый и каменный дуб)',
-      forestOrchard: 'Миндальные сады & кустарники',
+      forestOrchard: 'Сады (в т.ч. миндаль) & рожковое дерево',
       titlePhenoFilter: 'Фенология & Листва',
       phenoAll: 'Все состояния',
       phenoFlowering: 'Активное цветение',
@@ -108,7 +116,7 @@
       legPine: 'Сосновые',
       legDeciduous: 'Листопадные дубы и каштаны',
       legMontado: 'Монтадо (пробка / каменный дуб)',
-      legOrchard: 'Миндаль и плодоносящие кустарники',
+      legOrchard: 'Сады и рожковые рощи',
       legFolYellow: 'Золотая / Желтая листва (Идеально для прогулок)',
       legFolFallen: 'Опавшая листва / Ковер на земле',
       legFlowering: 'Идет цветение',
@@ -164,7 +172,7 @@
       forestPine: 'Pinhais & Resinosas (890 mil ha)',
       forestDeciduous: 'Folhosas Caducifólias (Carvalhos/Castanheiros)',
       forestMontado: 'Montado (Sobreiro & Azinheira - 1M ha)',
-      forestOrchard: 'Pomares de Amendoeira & Arbustos',
+      forestOrchard: 'Pomares (incl. amendoal) & Alfarrobais',
       titlePhenoFilter: 'Fenologia & Estado das Folhas',
       phenoAll: 'Todos os Estados',
       phenoFlowering: 'Floração Ativa',
@@ -198,7 +206,7 @@
       legPine: 'Pinhais & Resinosas',
       legDeciduous: 'Folhosas Caducifólias (Carvalho/Castanheiro)',
       legMontado: 'Montado (Sobreiro/Azinheira)',
-      legOrchard: 'Amendoeiras & Arbustos',
+      legOrchard: 'Pomares & Alfarrobais',
       legFolYellow: 'Folhas Douradas / Amarelas (Ideal para Passear)',
       legFolFallen: 'Folhas já caídas no solo',
       legFlowering: 'Floração em curso',
@@ -254,7 +262,7 @@
       forestPine: 'Pine & Conifers (890k ha)',
       forestDeciduous: 'Deciduous Broadleaf (Oaks/Chestnut)',
       forestMontado: 'Montado (Cork & Holm Oak - 1M ha)',
-      forestOrchard: 'Almond Orchards & Fruiting Shrubs',
+      forestOrchard: 'Orchards (incl. almond) & Carob',
       titlePhenoFilter: 'Phenology & Foliage State',
       phenoAll: 'All States',
       phenoFlowering: 'Active Blooming',
@@ -288,7 +296,7 @@
       legPine: 'Pine & Conifers',
       legDeciduous: 'Deciduous Broadleaf (Oaks/Chestnut)',
       legMontado: 'Montado (Cork & Holm Oak)',
-      legOrchard: 'Almond Orchards & Shrubs',
+      legOrchard: 'Orchards & Carob',
       legFolYellow: 'Golden / Amber Foliage (Ideal for Walking)',
       legFolFallen: 'Fallen Leaves / Forest Floor Carpet',
       legFlowering: 'Active Blooming',
@@ -331,11 +339,20 @@
     en: ['01 • January', '02 • February', '03 • March', '04 • April', '05 • May', '06 • June', '07 • July', '08 • August', '09 • September', '10 • October', '11 • November', '12 • December']
   };
 
+  const ZONE_NAMES = {
+    ru: { high_mountain: 'высокогорье', mid_mountain: 'среднегорье', lowland_coastal: 'равнины и побережье', south: 'юг' },
+    pt: { high_mountain: 'alta montanha', mid_mountain: 'média montanha', lowland_coastal: 'planície e litoral', south: 'sul' },
+    en: { high_mountain: 'high mountains', mid_mountain: 'mid-elevations', lowland_coastal: 'lowlands & coast', south: 'south' }
+  };
+
   // =========================================================================
   // DGT COS Level 4 Exact CQL Code Mapping (Clean forest codes, excludes 6.1.1.1 Matos)
+  // Note: COS 2.2.2.x classes are orchard *density/form* classes (low density, high density,
+  // hedge), not crop types — COS cannot isolate almond or chestnut orchards. Only traditional
+  // low-density orchards (2.2.2.1, flagged isForest in cosN4Translations) join the forest view.
   // =========================================================================
   const FOREST_TYPE_CQL = {
-    all: "cos25v1_n1_c = '5' OR cos25v1_n1_c = '4' OR cos25v1_n4_c IN ('2.2.2.1', '2.2.2.2', '2.2.2.3', '5.1.1.5')",
+    all: "cos25v1_n1_c = '5' OR cos25v1_n1_c = '4' OR cos25v1_n4_c = '2.2.2.1'",
     eucalyptus: "cos25v1_n4_c = '5.1.1.6'",
     pine: "cos25v1_n4_c IN ('5.1.2.1', '5.1.2.2', '5.1.2.3', '4.1.2.1', '4.1.2.2', '4.2.2.1', '4.2.2.2')",
     deciduous: "cos25v1_n4_c IN ('5.1.1.3', '5.1.1.4', '5.1.1.8', '4.1.1.3', '4.1.1.4', '4.2.1.3', '4.2.1.4')",
@@ -377,7 +394,7 @@
 
     const descriptions = {
       ru: {
-        '10.2': 'Золотой пик каштанов и буков в Серра-да-Эштрела и Монтезинью; одновременное цветение и созревание ягод земляничного дерева в Моншике; осыпание желудей в монтадо.',
+        '10.2': 'Пожелтение каштанов, буков и берёз набирает силу в высокогорьях Серра-да-Эштрела и Монтезинью (пик — в конце октября); одновременное цветение и созревание ягод земляничного дерева в Моншике; осыпание желудей в монтадо.',
         '10.1': 'Первые золотистые штрихи на высоких склонах Жереша и Монтезинью; сбор каштанов в Траз-уж-Монтиш; сбор шишек и зрелые смолистые сосняки.',
         '10.3': 'Максимальный багряно-медный навес на Rota das Faias в Мантейгаше; каштановые ярмарки; зрелые алые ягоды земляничника в Алгарве.',
         '11.1': 'Золотая листва спускается в предгорья (Бусаку, Сан-Мамеде); традиционный праздник жареных каштанов Магушту.',
@@ -385,7 +402,7 @@
         '11.3': 'Листопад завершается на севере; зеленое великолепие вечнозеленых лесов монтадо и сосновых боров.'
       },
       pt: {
-        '10.2': 'Pico dourado nos soutos e faias da Serra da Estrela e Montesinho; floração e medronhos maduros em simultâneo em Monchique; queda da bolota nos montados.',
+        '10.2': 'Amarelecimento em curso nos soutos, faiais e bidoeirais de altitude da Serra da Estrela e Montesinho (pico no final de outubro); floração e medronhos maduros em simultâneo em Monchique; queda da bolota nos montados.',
         '10.1': 'Primeiras tonalidades douradas nas encostas altas do Gerês e Montesinho; arranque da apanha da castanha em Trás-os-Montes; pinhais costeiros viçosos.',
         '10.3': 'Abóbada de cobre e âmbar na Rota das Faias de Manteigas; soutos transmontanos radiantes; medronhos vermelhos maduros nas encostas de Monchique.',
         '11.1': 'Cores de outono atingem as cotas médias e vales (Buçaco, Serra de São Mamede); aroma a castanhas assadas e festas tradicionais de Magusto.',
@@ -393,7 +410,7 @@
         '11.3': 'Conclusão da queda da folha nas serras nortenhas; contraste majestoso com a verdura perene dos montados e pinhais do litoral.'
       },
       en: {
-        '10.2': 'Peak golden foliage in chestnut and beech forests of Serra da Estrela & Montesinho; simultaneous flowering and red berries on strawberry trees in Monchique; acorn drop in the montado.',
+        '10.2': 'Yellowing under way in high-elevation chestnut, beech and birch stands of Serra da Estrela & Montesinho (peak in late October); simultaneous flowering and red berries on strawberry trees in Monchique; acorn drop in the montado.',
         '10.1': 'First golden hues on the high ridges of Gerês and Montesinho; beginning of the sweet chestnut harvest in Trás-os-Montes; vibrant coastal pine woods.',
         '10.3': 'Fiery copper-amber canopy along the Rota das Faias in Manteigas; glowing chestnut groves; brilliant red ripe medronho berries in the Algarve hills.',
         '11.1': 'Autumn coloration descends to mid-elevations (Buçaco, Serra de São Mamede); traditional Magusto chestnut roasting festivals across the country.',
@@ -450,14 +467,17 @@
     };
 
     if (deciduousSpecies.length > 0) {
-      const rankOrder = { peak_yellow: 5, yellowing: 4, falling: 3, fallen: 2, green: 1 };
       let highestRank = 0;
       let chosenStatus = null;
+      // Every state present at the site, so e.g. "fallen" still matches a forest whose
+      // birches are bare while its chestnuts are at peak colour
+      const statuses = [];
 
       deciduousSpecies.forEach(sp => {
         const st = DATA.getAutumnStatus(sp, loc, periodKey);
         if (st) {
-          const rank = rankOrder[st.status] || 0;
+          if (statuses.indexOf(st.status) === -1) statuses.push(st.status);
+          const rank = DATA.FOLIAGE_RANK[st.status] || 0;
           if (rank >= highestRank) {
             highestRank = rank;
             chosenStatus = st;
@@ -466,7 +486,7 @@
       });
 
       if (chosenStatus) {
-        dominantFoliage = chosenStatus;
+        dominantFoliage = Object.assign({}, chosenStatus, { statuses });
       }
     }
 
@@ -501,29 +521,8 @@
       const periodKey = `${state.month}.${decadeNum}`;
       const matchingCodes = new Set();
 
-      DATA.species.forEach(sp => {
-        let match = false;
-        if (state.phenoState === 'flowering') {
-          match = sp.phenology.floweringMonths.indexOf(state.month) !== -1;
-        } else if (state.phenoState === 'fruiting') {
-          match = sp.phenology.fruitingMonths.indexOf(state.month) !== -1;
-        } else if (state.phenoState === 'foliage_yellowing') {
-          if (sp.leafType === 'deciduous') {
-            const st = DATA.getAutumnStatus(sp, null, periodKey);
-            match = st && (st.status === 'yellowing' || st.status === 'peak_yellow');
-          }
-        } else if (state.phenoState === 'foliage_fallen') {
-          if (sp.leafType === 'deciduous') {
-            const st = DATA.getAutumnStatus(sp, null, periodKey);
-            match = st && (st.status === 'fallen' || st.status === 'falling');
-          }
-        } else if (state.phenoState === 'foliage_green') {
-          match = sp.leafType === 'evergreen';
-        }
-
-        if (match && sp.dgtCosCodes) {
-          sp.dgtCosCodes.forEach(code => matchingCodes.add(code));
-        }
+      getMappedPhenoSpecies(state.phenoState, periodKey).mapped.forEach(sp => {
+        sp.dgtCosCodes.forEach(code => matchingCodes.add(code));
       });
 
       if (matchingCodes.size > 0) {
@@ -541,7 +540,7 @@
       DATA.species.forEach(sp => {
         const isFl = sp.phenology.floweringMonths.indexOf(state.month) !== -1;
         const isFr = sp.phenology.fruitingMonths.indexOf(state.month) !== -1;
-        if ((isFl || isFr) && sp.dgtCosCodes) {
+        if ((isFl || isFr) && DATA.isCosMappable(sp)) {
           sp.dgtCosCodes.forEach(c => activeCodes.add(c));
         }
       });
@@ -578,18 +577,44 @@
     return cats.indexOf(filterType) !== -1;
   }
 
+  // Foliage states accepted by each phenology pill
+  const PHENO_FOLIAGE_STATES = {
+    foliage_yellowing: ['yellowing', 'peak_yellow'],
+    foliage_fallen: ['fallen', 'falling'],
+    foliage_green: ['green', 'evergreen']
+  };
+
+  function speciesMatchesPheno(sp, phenoState, periodKey) {
+    if (phenoState === 'flowering') return sp.phenology.floweringMonths.indexOf(state.month) !== -1;
+    if (phenoState === 'fruiting') return sp.phenology.fruitingMonths.indexOf(state.month) !== -1;
+    const wanted = PHENO_FOLIAGE_STATES[phenoState];
+    if (!wanted) return true;
+    const nat = DATA.getNationalAutumnStatus(sp, periodKey);
+    return nat.statuses.some(st => wanted.indexOf(st) !== -1);
+  }
+
+  // Species matching a phenology pill, split into those that can drive WMS polygons and
+  // those without a COS class of their own (shown via markers/species list only).
+  function getMappedPhenoSpecies(phenoState, periodKey) {
+    const matching = DATA.species.filter(sp => speciesMatchesPheno(sp, phenoState, periodKey));
+    return {
+      all: matching,
+      mapped: matching.filter(sp => DATA.isCosMappable(sp)),
+      unmapped: matching.filter(sp => !DATA.isCosMappable(sp))
+    };
+  }
+
   function matchPhenology(statusObj, filterPheno) {
     if (filterPheno === 'all') return true;
     if (filterPheno === 'flowering') return statusObj.isFlowering;
     if (filterPheno === 'fruiting') return statusObj.isFruiting;
 
-    const fol = statusObj.foliage ? statusObj.foliage.status : 'green';
-
-    if (filterPheno === 'foliage_yellowing') return fol === 'yellowing' || fol === 'peak_yellow';
-    if (filterPheno === 'foliage_fallen') return fol === 'fallen' || fol === 'falling';
-    if (filterPheno === 'foliage_green') return fol === 'green' || fol === 'evergreen';
-
-    return true;
+    const wanted = PHENO_FOLIAGE_STATES[filterPheno];
+    if (!wanted) return true;
+    const statuses = statusObj.foliage
+      ? (statusObj.foliage.statuses || [statusObj.foliage.status])
+      : ['green'];
+    return statuses.some(st => wanted.indexOf(st) !== -1);
   }
 
   function getFilteredLocations() {
@@ -687,12 +712,7 @@
       const isFlowering = sp.phenology.floweringMonths.indexOf(state.month) !== -1;
       const isFruiting = sp.phenology.fruitingMonths.indexOf(state.month) !== -1;
 
-      let autumnSt = { status: 'evergreen' };
-      if (sp.leafType === 'deciduous') {
-        autumnSt = DATA.getAutumnStatus(sp, null, periodKey);
-      }
-
-      const phenoObj = { isFlowering, isFruiting, foliage: autumnSt };
+      const phenoObj = { isFlowering, isFruiting, foliage: DATA.getNationalAutumnStatus(sp, periodKey) };
       if (!matchPhenology(phenoObj, state.phenoState)) {
         return false;
       }
@@ -838,6 +858,7 @@
   // =========================================================================
   function updateWmsLayer() {
     if (!map) return;
+    if (state.mapMode === 'minerals') return;
 
     const cql = calculateActiveCql();
 
@@ -931,7 +952,7 @@
     }
 
     if (coordsEl && latlng) {
-      coordsEl.textContent = `${latlng.lat.toFixed(4)}° N, ${latlng.lng.toFixed(4)}° W`;
+      coordsEl.textContent = `${latlng.lat.toFixed(4)}° N, ${Math.abs(latlng.lng).toFixed(4)}° W`;
     }
 
     if (statusBadge) {
@@ -964,18 +985,23 @@
   // =========================================================================
   function onMapClick(e) {
     if (!map) return;
+    collapseSheetOnMobile();
+    // COS land-cover parcels are a forests-mode feature
+    if (state.mapMode === 'minerals') return;
 
-    const bounds = map.getBounds();
-    const sw = bounds.getSouthWest();
-    const ne = bounds.getNorthEast();
-    const size = map.getSize();
-    const point = map.latLngToContainerPoint(e.latlng, map.getZoom());
+    // Query a small window centred on the click. Leaflet draws in Web Mercator while the request
+    // is EPSG:4326; with a whole-viewport bbox the linear pixel→latitude mapping drifts by
+    // several km at national zoom levels and returns the wrong parcel.
+    const R = 5;
+    const point = map.latLngToContainerPoint(e.latlng);
+    const sw = map.containerPointToLatLng([point.x - R, point.y + R]);
+    const ne = map.containerPointToLatLng([point.x + R, point.y - R]);
 
     const bbox = `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`;
-    const width = Math.round(size.x);
-    const height = Math.round(size.y);
-    const x = Math.round(point.x);
-    const y = Math.round(point.y);
+    const width = 2 * R + 1;
+    const height = 2 * R + 1;
+    const x = R;
+    const y = R;
 
     const getFeatureInfoUrl =
       `${DATA.wmsConfig.url}?` +
@@ -990,7 +1016,7 @@
 
     if (inspector) inspector.classList.remove('hidden');
     if (nameEl) nameEl.textContent = state.lang === 'ru' ? 'Запрос к серверу DGT...' : 'A consultar DGT...';
-    if (coordsEl) coordsEl.textContent = `${e.latlng.lat.toFixed(4)}° N, ${e.latlng.lng.toFixed(4)}° W`;
+    if (coordsEl) coordsEl.textContent = `${e.latlng.lat.toFixed(4)}° N, ${Math.abs(e.latlng.lng).toFixed(4)}° W`;
 
     fetch(getFeatureInfoUrl)
       .then(res => res.json())
@@ -1025,7 +1051,9 @@
             nameEl.textContent =
               state.lang === 'ru'
                 ? 'Вне классификации DGT / Водная поверхность'
-                : 'Sem ocupação florestal DGT neste ponto / Água';
+                : state.lang === 'pt'
+                ? 'Sem polígono DGT COS neste ponto / Água'
+                : 'No DGT COS polygon at this point / Water';
           }
           const codeEl = document.getElementById('val-parcel-code');
           const areaEl = document.getElementById('val-parcel-area');
@@ -1041,14 +1069,29 @@
         }
       })
       .catch(err => {
+        // Never invent a parcel class or area when the DGT server cannot be reached
         console.warn('GetFeatureInfo issue:', err);
-        if (nameEl) nameEl.textContent = state.lang === 'ru' ? 'Лесной участок (ожидание данных)' : 'Ponto florestal registado';
-        const codeEl = document.getElementById('val-parcel-code');
-        const areaEl = document.getElementById('val-parcel-area');
-        const regionEl = document.getElementById('val-parcel-region');
-        if (codeEl) codeEl.textContent = '5.1.x';
-        if (areaEl) areaEl.textContent = '~15 ha';
-        if (regionEl) regionEl.textContent = 'Portugal';
+        state.inspectedParcel = null;
+        if (nameEl) {
+          nameEl.textContent = state.lang === 'ru'
+            ? 'Сервер DGT недоступен — данные участка не получены'
+            : state.lang === 'pt'
+            ? 'Servidor DGT indisponível — sem dados da parcela'
+            : 'DGT server unavailable — no parcel data received';
+        }
+        const statusBadge = document.getElementById('inspector-status-badge');
+        if (statusBadge) {
+          statusBadge.classList.remove('badge-forest', 'badge-nonforest');
+          statusBadge.textContent = 'DGT COS 2025v1';
+        }
+        ['val-parcel-code', 'val-parcel-area', 'val-parcel-region'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = '—';
+        });
+        if (highlightParcelLayer) {
+          map.removeLayer(highlightParcelLayer);
+          highlightParcelLayer = null;
+        }
       });
   }
 
@@ -1229,13 +1272,15 @@
           <div class="active-pheno-pills-row">
             ${deciduousSpecies.map(sp => {
               const common = sp.names[state.lang] || sp.names.pt;
-              const fol = DATA.getAutumnStatus(sp, null, periodKey);
+              const fol = DATA.getNationalAutumnStatus(sp, periodKey);
               const folLbl = fol ? fol.label[state.lang] : '';
+              const zoneHint = fol && fol.statuses.length > 1 ? ` (${ZONE_NAMES[state.lang][fol.zone]})` : '';
+              const zoneDetail = fol ? fol.byZone.map(z => `${ZONE_NAMES[state.lang][z.zone]}: ${z.label[state.lang]}`).join('\n') : '';
               const isSelected = state.specificSpecies === sp.id;
               return `
-                <button class="active-species-pill ${isSelected ? 'selected' : ''}" onclick="window.florestasApp.filterBySpecies('${sp.id}')" title="${folLbl}">
+                <button class="active-species-pill ${isSelected ? 'selected' : ''}" onclick="window.florestasApp.filterBySpecies('${sp.id}')" title="${zoneDetail}">
                   <span>🍂</span>
-                  <span><strong>${common}</strong>: ${folLbl}</span>
+                  <span><strong>${common}</strong>: ${folLbl}${zoneHint}</span>
                 </button>
               `;
             }).join('')}
@@ -1408,7 +1453,7 @@
 
       let foliageStatus = null;
       if (sp.leafType === 'deciduous') {
-        foliageStatus = DATA.getAutumnStatus(sp, null, periodKey);
+        foliageStatus = DATA.getNationalAutumnStatus(sp, periodKey);
       }
 
       return `
@@ -1641,7 +1686,7 @@
 
     let folStatus = { status: 'evergreen', label: { ru: 'Вечнозеленый', pt: 'Perenifólio', en: 'Evergreen' } };
     if (sp.leafType === 'deciduous') {
-      folStatus = DATA.getAutumnStatus(sp, null, periodKey);
+      folStatus = DATA.getNationalAutumnStatus(sp, periodKey);
     }
 
     document.getElementById('detail-category').textContent = sp.scientificName;
@@ -1651,12 +1696,12 @@
     document.getElementById('detail-box-foliage').textContent = folStatus.label[state.lang];
     document.getElementById('detail-box-flowering').textContent =
       sp.phenology.floweringMonths.indexOf(state.month) !== -1
-        ? (state.lang === 'ru' ? 'В полном цвету' : 'Floração ativa')
-        : (state.lang === 'ru' ? 'Цветение не наблюдается' : 'Sem floração');
+        ? (state.lang === 'ru' ? 'В полном цвету' : state.lang === 'pt' ? 'Floração ativa' : 'In bloom')
+        : (state.lang === 'ru' ? 'Цветение не наблюдается' : state.lang === 'pt' ? 'Sem floração' : 'Not flowering');
     document.getElementById('detail-box-fruiting').textContent =
       sp.phenology.fruitingMonths.indexOf(state.month) !== -1
-        ? (state.lang === 'ru' ? 'Созревание плодов / семян' : 'Maturação de fruto')
-        : (state.lang === 'ru' ? 'Вне периода сбора' : 'Fora da época');
+        ? (state.lang === 'ru' ? 'Созревание плодов / семян' : state.lang === 'pt' ? 'Maturação de fruto' : 'Fruit / seed ripening')
+        : (state.lang === 'ru' ? 'Вне периода сбора' : state.lang === 'pt' ? 'Fora da época' : 'Out of season');
 
     renderPhenologyCalendar(null, sp);
 
@@ -1697,7 +1742,7 @@
         isFl = sp.phenology.floweringMonths.indexOf(m) !== -1;
         isFr = sp.phenology.fruitingMonths.indexOf(m) !== -1;
         if (sp.leafType === 'deciduous') {
-          const st = DATA.getAutumnStatus(sp, null, `${m}.2`);
+          const st = DATA.getNationalAutumnStatus(sp, `${m}.2`);
           if (st.status === 'yellowing' || st.status === 'peak_yellow') folSymbol = '🍂';
           else if (st.status === 'fallen') folSymbol = '🪵';
         }
@@ -1809,6 +1854,10 @@
     const resetBtn = document.getElementById('btn-reset-filters');
 
     if (!banner || !iconEl || !titleEl || !badgeEl || !descEl) return;
+    if (state.mapMode === 'minerals') {
+      updateMineralsExplainer();
+      return;
+    }
 
     banner.classList.remove('warning-mode');
 
@@ -1830,119 +1879,130 @@
         const spName = sp.names[lang] || sp.names.pt;
         const codesStr = (sp.dgtCosCodes || []).join(', ');
         badge = `COS ${codesStr}`;
+        const isProxy = !DATA.isCosMappable(sp);
+        if (isProxy) banner.classList.add('warning-mode');
         if (lang === 'ru') {
           title = `Вид: ${spName}`;
-          desc = `Отображаются только участки произрастания данного вида по DGT COS (коды: ${codesStr}).`;
+          desc = isProxy
+            ? `В DGT COS нет отдельного класса для этого вида. Показаны классы-местообитания, где он обычно встречается (коды: ${codesStr}) — сам вид присутствует не на каждом участке.`
+            : `Отображаются только участки произрастания данного вида по DGT COS (коды: ${codesStr}).`;
         } else if (lang === 'pt') {
           title = `Espécie: ${spName}`;
-          desc = `Apresenta apenas os polígonos DGT COS específicos (${codesStr}) desta espécie.`;
+          desc = isProxy
+            ? `A COS da DGT não tem classe própria para esta espécie. Mostram-se as classes de habitat onde ocorre habitualmente (${codesStr}) — nem todos os polígonos a contêm.`
+            : `Apresenta apenas os polígonos DGT COS específicos (${codesStr}) desta espécie.`;
         } else {
           title = `Species: ${spName}`;
-          desc = `Displaying only official DGT COS parcels (${codesStr}) for this tree species.`;
+          desc = isProxy
+            ? `DGT COS has no class of its own for this species. Showing the habitat classes where it typically grows (${codesStr}) — not every polygon contains it.`
+            : `Displaying only official DGT COS parcels (${codesStr}) for this tree species.`;
         }
       }
     } else if (state.phenoState !== 'all') {
       hasFilter = true;
+      const ph = getMappedPhenoSpecies(state.phenoState, periodKey);
+      const names = list => list.map(s => s.names[lang] || s.names.pt).join(', ');
+      const spNames = names(ph.mapped);
+      const count = ph.all.length;
+      // Species without their own COS class cannot be drawn as polygons; say so explicitly
+      const unmappedNote = ph.unmapped.length === 0 ? '' : lang === 'ru'
+        ? ` Без отдельного класса COS (только маркеры): ${names(ph.unmapped)}.`
+        : lang === 'pt'
+        ? ` Sem classe COS própria (apenas marcadores): ${names(ph.unmapped)}.`
+        : ` No COS class of their own (markers only): ${names(ph.unmapped)}.`;
+      const zoneNote = lang === 'ru'
+        ? ' В слое COS нет высот: участок подсвечен, если фаза наступила хотя бы в одной высотной зоне — местные сроки смотрите на маркерах.'
+        : lang === 'pt'
+        ? ' A COS não inclui altitude: o polígono é destacado se a fase ocorre em pelo menos uma faixa altitudinal — veja os marcadores para datas locais.'
+        : ' COS has no elevation data: a polygon is highlighted if the phase occurs in at least one altitude band — check markers for local timing.';
+      const hiddenNote = lang === 'ru' ? ' Полигоны WMS скрыты.' : lang === 'pt' ? ' Polígonos WMS ocultados.' : ' WMS polygons are hidden.';
+      if (ph.mapped.length === 0) banner.classList.add('warning-mode');
+
       if (state.phenoState === 'foliage_yellowing') {
         icon = '🍂';
         badge = lang === 'ru' ? 'Золотая осень' : lang === 'pt' ? 'Pico Dourado' : 'Golden Peak';
-        const activeDecid = DATA.species.filter(sp => {
-          if (sp.leafType !== 'deciduous') return false;
-          const st = DATA.getAutumnStatus(sp, null, periodKey);
-          return st && (st.status === 'yellowing' || st.status === 'peak_yellow');
-        });
-        const spNames = activeDecid.map(s => s.names[lang] || s.names.pt).join(', ');
         if (lang === 'ru') {
-          title = `Золотая листва: ${activeDecid.length} вид(ов)`;
-          desc = activeDecid.length > 0
-            ? `Подсвечены лиственные леса (${spNames}). Пик осенних пейзажей и прогулок!`
-            : `В текущий период нет видов на пике пожелтения листвы.`;
+          title = `Золотая листва: ${count} вид(ов)`;
+          desc = ph.mapped.length > 0
+            ? `Подсвечены лиственные леса (${spNames}).${zoneNote}`
+            : `В текущий период ни в одной высотной зоне нет картируемых видов с желтеющей листвой.${hiddenNote}`;
         } else if (lang === 'pt') {
-          title = `Folhagem dourada: ${activeDecid.length} espécie(s)`;
-          desc = activeDecid.length > 0
-            ? `Destacadas as folhosas caducifólias (${spNames}). Período ideal para passeios outonais!`
-            : `Neste período não há espécies em pico de amarelecimento foliar.`;
+          title = `Folhagem dourada: ${count} espécie(s)`;
+          desc = ph.mapped.length > 0
+            ? `Destacadas as folhosas caducifólias (${spNames}).${zoneNote}`
+            : `Neste período nenhuma espécie cartografável está em amarelecimento foliar em qualquer faixa altitudinal.${hiddenNote}`;
         } else {
-          title = `Golden foliage: ${activeDecid.length} species`;
-          desc = activeDecid.length > 0
-            ? `Highlighting deciduous forests (${spNames}). Prime time for autumn walks!`
-            : `No species are currently at peak foliage senescence.`;
+          title = `Golden foliage: ${count} species`;
+          desc = ph.mapped.length > 0
+            ? `Highlighting deciduous forests (${spNames}).${zoneNote}`
+            : `No mappable species is yellowing in any altitude band during this period.${hiddenNote}`;
         }
+        desc += unmappedNote;
       } else if (state.phenoState === 'foliage_fallen') {
         icon = '🪵';
         badge = lang === 'ru' ? 'Зимний покой' : lang === 'pt' ? 'Folhas Caídas' : 'Fallen Leaves';
-        const fallenDecid = DATA.species.filter(sp => {
-          if (sp.leafType !== 'deciduous') return false;
-          const st = DATA.getAutumnStatus(sp, null, periodKey);
-          return st && (st.status === 'fallen' || st.status === 'falling');
-        });
-        if (fallenDecid.length === 0) {
-          banner.classList.add('warning-mode');
+        if (ph.mapped.length === 0) {
           if (lang === 'ru') {
-            title = 'Опавшая листва: 0 видов';
-            desc = 'В середине октября в Португалии листья ещё не опали. Дубравы и каштаны находятся в золотом или зелёном уборе. Полигоны WMS скрыты.';
+            title = `Опавшая листва: ${count} вид(ов)`;
+            desc = `В выбранный период ни в одной высотной зоне листопад ещё не начался: дубравы и каштаны стоят в зелёном или золотом уборе.${hiddenNote}`;
           } else if (lang === 'pt') {
-            title = 'Folhas caídas: 0 espécies';
-            desc = 'Em meados de outubro em Portugal as folhas ainda não caíram. Os soutos e carvalhais mantêm copa dourada ou verde. Polígonos WMS ocultados.';
+            title = `Folhas caídas: ${count} espécie(s)`;
+            desc = `No período escolhido a queda da folha ainda não começou em nenhuma faixa altitudinal: soutos e carvalhais mantêm copa verde ou dourada.${hiddenNote}`;
           } else {
-            title = 'Fallen leaves: 0 species';
-            desc = 'In mid-October in Portugal leaves have not fallen yet. Canopies are still golden or green. WMS polygons are hidden.';
+            title = `Fallen leaves: ${count} species`;
+            desc = `In the selected period leaf fall has not started in any altitude band: canopies are still green or golden.${hiddenNote}`;
           }
+        } else if (lang === 'ru') {
+          title = `Опавшая листва (${count} вид(ов))`;
+          desc = `Подсвечены массивы с идущим или завершённым листопадом либо голыми ветвями: ${spNames}.${zoneNote}`;
+        } else if (lang === 'pt') {
+          title = `Folhas no solo (${count} espécies)`;
+          desc = `Destacados povoamentos em desfolhação, desfolhados ou de ramos nus: ${spNames}.${zoneNote}`;
         } else {
-          const spNames = fallenDecid.map(s => s.names[lang] || s.names.pt).join(', ');
-          if (lang === 'ru') {
-            title = `Опавшая листва (${fallenDecid.length} вид(ов))`;
-            desc = `Подсвечены массивы с завершённым листопадом: ${spNames}.`;
-          } else if (lang === 'pt') {
-            title = `Folhas no solo (${fallenDecid.length} espécies)`;
-            desc = `Destacados povoamentos com desfolhação terminada: ${spNames}.`;
-          } else {
-            title = `Fallen leaves (${fallenDecid.length} species)`;
-            desc = `Highlighting stands with shed foliage: ${spNames}.`;
-          }
+          title = `Fallen leaves (${count} species)`;
+          desc = `Highlighting stands with active leaf drop or bare branches: ${spNames}.${zoneNote}`;
         }
+        desc += unmappedNote;
       } else if (state.phenoState === 'flowering') {
         icon = '🌸';
         badge = lang === 'ru' ? 'Цветение' : lang === 'pt' ? 'Floração' : 'Blooming';
-        const flSp = DATA.species.filter(sp => sp.phenology.floweringMonths.indexOf(state.month) !== -1);
-        const spNames = flSp.map(s => s.names[lang] || s.names.pt).join(', ');
         if (lang === 'ru') {
-          title = `Активное цветение: ${flSp.length} вид(ов)`;
-          desc = `Подсвечены участки цветущих видов (${spNames}).`;
+          title = `Активное цветение: ${count} вид(ов)`;
+          desc = ph.mapped.length > 0 ? `Подсвечены участки цветущих видов (${spNames}).` : `Нет картируемых цветущих видов.${hiddenNote}`;
         } else if (lang === 'pt') {
-          title = `Floração ativa: ${flSp.length} espécie(s)`;
-          desc = `Destacadas as manchas com espécies em floração (${spNames}).`;
+          title = `Floração ativa: ${count} espécie(s)`;
+          desc = ph.mapped.length > 0 ? `Destacadas as manchas com espécies em floração (${spNames}).` : `Sem espécies cartografáveis em floração.${hiddenNote}`;
         } else {
-          title = `Active blooming: ${flSp.length} species`;
-          desc = `Highlighting stands with actively blooming species (${spNames}).`;
+          title = `Active blooming: ${count} species`;
+          desc = ph.mapped.length > 0 ? `Highlighting stands with actively blooming species (${spNames}).` : `No mappable species in bloom.${hiddenNote}`;
         }
+        desc += unmappedNote;
       } else if (state.phenoState === 'fruiting') {
         icon = '🌰';
         badge = lang === 'ru' ? 'Спелые плоды' : lang === 'pt' ? 'Frutificação' : 'Fruiting';
-        const frSp = DATA.species.filter(sp => sp.phenology.fruitingMonths.indexOf(state.month) !== -1);
-        const spNames = frSp.map(s => s.names[lang] || s.names.pt).join(', ');
         if (lang === 'ru') {
-          title = `Спелые плоды и сбор урожая: ${frSp.length} вид(ов)`;
-          desc = `Подсвечены леса со спелыми плодами: каштаны, земляничное дерево, жёлуди дуба (${spNames}).`;
+          title = `Спелые плоды и сбор урожая: ${count} вид(ов)`;
+          desc = ph.mapped.length > 0 ? `Подсвечены леса со спелыми плодами (${spNames}).` : `Нет картируемых видов со спелыми плодами.${hiddenNote}`;
         } else if (lang === 'pt') {
-          title = `Fruto maduro & Colheita: ${frSp.length} espécie(s)`;
-          desc = `Destacadas florestas com frutos maduros: castanha, medronho, bolota (${spNames}).`;
+          title = `Fruto maduro & Colheita: ${count} espécie(s)`;
+          desc = ph.mapped.length > 0 ? `Destacadas florestas com frutos maduros (${spNames}).` : `Sem espécies cartografáveis com fruto maduro.${hiddenNote}`;
         } else {
-          title = `Ripe fruit & harvest: ${frSp.length} species`;
-          desc = `Highlighting forests with ripe fruits: chestnuts, strawberry-tree berries, acorns (${spNames}).`;
+          title = `Ripe fruit & harvest: ${count} species`;
+          desc = ph.mapped.length > 0 ? `Highlighting forests with ripe fruit (${spNames}).` : `No mappable species with ripe fruit.${hiddenNote}`;
         }
+        desc += unmappedNote;
       } else if (state.phenoState === 'foliage_green') {
         icon = '🌿';
-        badge = lang === 'ru' ? 'Вечнозелёные' : lang === 'pt' ? 'Perenifólias' : 'Evergreen';
+        badge = lang === 'ru' ? 'Зелёная крона' : lang === 'pt' ? 'Copa Verde' : 'Green Canopy';
         if (lang === 'ru') {
-          title = 'Вечнозелёные леса и хвоя';
-          desc = 'Подсвечены сосновые боры, эвкалиптовые рощи и средиземноморские вечнозелёные дубравы.';
+          title = 'Зелёная и вечнозелёная крона';
+          desc = `Подсвечены хвойные, эвкалипты, вечнозелёные дубы и лиственные леса, ещё зелёные хотя бы в одной высотной зоне (${spNames}).`;
         } else if (lang === 'pt') {
-          title = 'Florestas perenifólias e resinosas';
-          desc = 'Destacados pinhais, montados perenes e eucaliptais de copa verde contínua.';
+          title = 'Copa verde e perenifólia';
+          desc = `Destacados pinhais, eucaliptais, montados perenes e folhosas ainda verdes em pelo menos uma faixa altitudinal (${spNames}).`;
         } else {
-          title = 'Evergreen and coniferous forests';
-          desc = 'Highlighting pine stands, evergreen oak montados, and year-round green canopies.';
+          title = 'Green and evergreen canopy';
+          desc = `Highlighting pines, eucalyptus, evergreen oaks and deciduous stands still green in at least one altitude band (${spNames}).`;
         }
       }
     } else if (state.mode === 'autumn_walk') {
@@ -2017,14 +2077,14 @@
         icon = '🌸';
         badge = 'COS 2.2.2.x / 5.1.1.5';
         if (lang === 'ru') {
-          title = 'Миндальные сады и плодовые кустарники';
-          desc = 'Косточковые плодовые сады и земляничное дерево (medronheiro). Исключены сплошные пустоши (6.1.1.1).';
+          title = 'Плодовые сады и рожковые рощи';
+          desc = 'Все сады COS 2.2.2.x (низкой и высокой плотности, шпалерные) и рощи рожкового дерева (5.1.1.5). COS не различает культуры: миндаль здесь вместе с яблонями, грушами, цитрусовыми и др. Сплошные пустоши (6.1.1.1) исключены.';
         } else if (lang === 'pt') {
-          title = 'Pomares de amendoeira e matos de fruto';
-          desc = 'Frutos de casca rija e medronheiros (excluída a classe de matos generalistas 6.1.1.1).';
+          title = 'Pomares e alfarrobais';
+          desc = 'Todos os pomares COS 2.2.2.x (baixa e alta densidade, em sebe) e florestas de alfarrobeira (5.1.1.5). A COS não distingue culturas: amendoais surgem a par de macieiras, pereiras, citrinos, etc. Excluída a classe de matos 6.1.1.1.';
         } else {
-          title = 'Almond orchards & fruiting shrubs';
-          desc = 'Nut orchards and strawberry-tree shrubs (general scrubland 6.1.1.1 excluded).';
+          title = 'Orchards & carob woodland';
+          desc = 'All COS 2.2.2.x orchards (low-density, high-density, hedge) plus carob woodland (5.1.1.5). COS does not distinguish crops: almonds appear alongside apple, pear, citrus, etc. General scrubland 6.1.1.1 excluded.';
         }
       }
     } else {
@@ -2297,15 +2357,945 @@
   }
 
   // =========================================================================
+  // Minerals, Caves & Mines Mode
+  // Data: geo-data.js snapshot (scripts/fetch-geodata.mjs) of LNEG SIORMINP mineral
+  // occurrences (CC BY 4.0) and OpenStreetMap caves / mines (ODbL).
+  // =========================================================================
+  const GEO = window.FLORESTAS_GEO || { minerals: [], sites: [] };
+
+  // EU raw-material class of each LNEG CRM2023 occurrence (2023 EU critical / strategic lists)
+  const MINERAL_GROUPS = {
+    critical: { color: '#f97316', ru: 'Критическое сырьё ЕС', pt: 'Matéria-prima crítica (UE)', en: 'EU critical raw material' },
+    critical_strategic: { color: '#e11d48', ru: 'Критическое и стратегическое сырьё ЕС', pt: 'Crítica e estratégica (UE)', en: 'EU critical & strategic' },
+    strategic: { color: '#a855f7', ru: 'Стратегическое сырьё ЕС', pt: 'Matéria-prima estratégica (UE)', en: 'EU strategic raw material' }
+  };
+
+  // Marker colour by main substance; anything not listed is grey
+  const SUBSTANCE_COLORS = {
+    'W': '#38bdf8',
+    'Mn': '#f472b6',
+    'Cu': '#f97316',
+    'Feldspato': '#fde68a',
+    'Sb': '#a3e635',
+    'Ti': '#e2e8f0',
+    'Ba': '#fbbf24',
+    'Nb/Ta': '#c084fc',
+    'Li': '#2dd4bf',
+    'Fosfato': '#86efac',
+    'As': '#ef4444',
+    'Be': '#67e8f9',
+    'REE': '#facc15'
+  };
+  const SUBSTANCE_OTHER_COLOR = '#94a3b8';
+
+  const GEO_LAYERS = {
+    minerals: { icon: '💎', color: '#2dd4bf', ru: 'Рудопроявления (LNEG)', pt: 'Ocorrências minerais (LNEG)', en: 'Mineral occurrences (LNEG)' },
+    cave: { icon: '🦇', color: '#c084fc', ru: 'Пещеры', pt: 'Grutas', en: 'Caves' },
+    mine: { icon: '⛏️', color: '#fbbf24', ru: 'Шахты и штольни (статус не указан)', pt: 'Minas e galerias (estado desconhecido)', en: 'Mines & adits (status unknown)' },
+    mine_abandoned: { icon: '🏚️', color: '#a8a29e', ru: 'Заброшенные шахты', pt: 'Minas abandonadas', en: 'Abandoned mines' }
+  };
+
+  const MIN_STRINGS = {
+    ru: {
+      forests: 'Леса', minerals: 'Минералы', layers: 'Слои', groups: 'Вещества', classTitle: 'Класс сырья ЕС', genesis: 'Генезис', substance: 'Вещество',
+      sort: 'Сортировка', allSubstances: 'Все вещества', allGroups: 'Все группы', results: 'Результаты',
+      search: 'Название, вещество, муниципалитет…', sortName: 'По названию', sortSubstance: 'По веществу',
+      sortNorth: 'С севера на юг', sortGroup: 'По группе', sortType: 'По типу объекта',
+      showing: (n, total) => `Показаны первые ${n} из ${total}. Уточните фильтр, чтобы увидеть остальные.`,
+      none: 'Ничего не найдено для выбранных фильтров.',
+      appliesNote: 'Фильтры по веществу и классу относятся к рудопроявлениям LNEG; шахты из OSM учитываются по тегу ресурса, пещеры при выборе вещества скрываются. Набор LNEG CRM2023 охватывает критическое и стратегическое сырьё ЕС (вольфрам, литий, медь и др.), а не все полезные ископаемые.',
+      main: 'Основное вещество', all: 'Все вещества', category: 'Категория', size: 'Размер', place: 'Муниципалитет',
+      lnegSheet: 'Карточка LNEG', mindat: 'Искать на Mindat', osm: 'Объект в OpenStreetMap', unnamed: 'Без названия',
+      resource: 'Ресурс', access: 'Доступ',
+      safety: 'Заброшенные шахты и пещеры опасны: обвалы, вертикальные стволы, газы. Не входите без снаряжения и разрешения.',
+      explTitle: n => `Минералы, пещеры и шахты: ${n} объектов`,
+      explDesc: (m, c, mi, ab, d1, d2) => `${m} рудопроявлений критического сырья (LNEG CRM2023 / SIORMINP, снимок ${d1}) и ${c} пещер, ${mi} шахт, ${ab} заброшенных выработок из OpenStreetMap (снимок ${d2}). Лесные полигоны DGT скрыты.`,
+      source: (d1, d2) => `Источники: LNEG — CRM2023 / SIORMINP (CC BY 4.0, ${d1}); © участники OpenStreetMap (ODbL, ${d2}). OSM неполон: отсутствие точки не означает отсутствие объекта.`
+    },
+    pt: {
+      forests: 'Florestas', minerals: 'Minerais', layers: 'Camadas', groups: 'Substâncias', classTitle: 'Classe UE', genesis: 'Génese', substance: 'Substância',
+      sort: 'Ordenar', allSubstances: 'Todas as substâncias', allGroups: 'Todos os grupos', results: 'Resultados',
+      search: 'Nome, substância, concelho…', sortName: 'Por nome', sortSubstance: 'Por substância',
+      sortNorth: 'De norte a sul', sortGroup: 'Por grupo', sortType: 'Por tipo de local',
+      showing: (n, total) => `A mostrar os primeiros ${n} de ${total}. Refine o filtro para ver os restantes.`,
+      none: 'Sem resultados para os filtros escolhidos.',
+      appliesNote: 'Os filtros de substância e classe aplicam-se às ocorrências LNEG; minas do OSM entram pelo recurso indicado; grutas ficam ocultas quando se escolhe uma substância. O mapa LNEG CRM2023 abrange as matérias-primas críticas e estratégicas da UE (tungsténio, lítio, cobre, etc.), não todos os recursos minerais.',
+      main: 'Substância principal', all: 'Substâncias', category: 'Categoria', size: 'Dimensão', place: 'Concelho',
+      lnegSheet: 'Ficha LNEG', mindat: 'Pesquisar no Mindat', osm: 'Ver no OpenStreetMap', unnamed: 'Sem nome',
+      resource: 'Recurso', access: 'Acesso',
+      safety: 'Minas abandonadas e grutas são perigosas: derrocadas, poços verticais, gases. Não entre sem equipamento e autorização.',
+      explTitle: n => `Minerais, grutas e minas: ${n} locais`,
+      explDesc: (m, c, mi, ab, d1, d2) => `${m} ocorrências minerais de matérias-primas críticas (LNEG CRM2023 / SIORMINP, recolha ${d1}) e ${c} grutas, ${mi} minas e ${ab} minas abandonadas do OpenStreetMap (recolha ${d2}). Polígonos florestais DGT ocultos.`,
+      source: (d1, d2) => `Fontes: LNEG — CRM2023 / SIORMINP (CC BY 4.0, ${d1}); © contribuidores OpenStreetMap (ODbL, ${d2}). O OSM é incompleto: a ausência de um ponto não significa ausência do local.`
+    },
+    en: {
+      forests: 'Forests', minerals: 'Minerals', layers: 'Layers', groups: 'Substances', classTitle: 'EU raw-material class', genesis: 'Genesis', substance: 'Substance',
+      sort: 'Sort by', allSubstances: 'All substances', allGroups: 'All groups', results: 'Results',
+      search: 'Name, substance, municipality…', sortName: 'Name', sortSubstance: 'Substance',
+      sortNorth: 'North to south', sortGroup: 'Group', sortType: 'Site type',
+      showing: (n, total) => `Showing the first ${n} of ${total}. Narrow the filter to see the rest.`,
+      none: 'Nothing matches the selected filters.',
+      appliesNote: 'Substance and class filters apply to LNEG occurrences; OSM mines match through their resource tag; caves are hidden while a substance is selected. The LNEG CRM2023 map covers EU critical and strategic raw materials (tungsten, lithium, copper, etc.), not every mineral resource.',
+      main: 'Main substance', all: 'Substances', category: 'Category', size: 'Size', place: 'Municipality',
+      lnegSheet: 'LNEG record', mindat: 'Search on Mindat', osm: 'View on OpenStreetMap', unnamed: 'Unnamed',
+      resource: 'Resource', access: 'Access',
+      safety: 'Abandoned mines and caves are dangerous: collapses, vertical shafts, bad air. Do not enter without equipment and permission.',
+      explTitle: n => `Minerals, caves & mines: ${n} sites`,
+      explDesc: (m, c, mi, ab, d1, d2) => `${m} mineral occurrences of critical raw materials (LNEG CRM2023 / SIORMINP, snapshot ${d1}) plus ${c} caves, ${mi} mines and ${ab} abandoned mines from OpenStreetMap (snapshot ${d2}). DGT forest polygons hidden.`,
+      source: (d1, d2) => `Sources: LNEG — CRM2023 / SIORMINP (CC BY 4.0, ${d1}); © OpenStreetMap contributors (ODbL, ${d2}). OSM is incomplete: a missing point does not mean a missing site.`
+    }
+  };
+
+  // Trilingual labels for raw LNEG / OSM attribute values (pt = LNEG original wording)
+  const MIN_VALUE_I18N = {
+    "size": {
+      "Ocorrência": {
+        "ru": "Проявление",
+        "pt": "Ocorrência",
+        "en": "Occurrence"
+      },
+      "Pequena": {
+        "ru": "Малое",
+        "pt": "Pequena",
+        "en": "Small"
+      },
+      "Média": {
+        "ru": "Среднее",
+        "pt": "Média",
+        "en": "Medium"
+      },
+      "Grande": {
+        "ru": "Крупное",
+        "pt": "Grande",
+        "en": "Large"
+      }
+    },
+    "genesis": {
+      "Magmática/Hidrotermal - Aplo-Pegmatítica": {
+        "ru": "Магматический/гидротермальный – аплитово-пегматитовый",
+        "pt": "Magmática/Hidrotermal - Aplo-Pegmatítica",
+        "en": "Magmatic/hydrothermal – aplite-pegmatite"
+      },
+      "Hidrotermal - Hidrotermal": {
+        "ru": "Гидротермальный – гидротермальный",
+        "pt": "Hidrotermal - Hidrotermal",
+        "en": "Hydrothermal – hydrothermal"
+      },
+      "Magmática/Hidrotermal - Epigenética": {
+        "ru": "Магматический/гидротермальный – эпигенетический",
+        "pt": "Magmática/Hidrotermal - Epigenética",
+        "en": "Magmatic/hydrothermal – epigenetic"
+      },
+      "Hidrotermal - Outros Depósitos Vulcanogénicos": {
+        "ru": "Гидротермальный – прочие вулканогенные месторождения",
+        "pt": "Hidrotermal - Outros Depósitos Vulcanogénicos",
+        "en": "Hydrothermal – other volcanogenic deposits"
+      },
+      "Processos Superficiais - Depósitos Aluvionares": {
+        "ru": "Поверхностные процессы – аллювиальные россыпи",
+        "pt": "Processos Superficiais - Depósitos Aluvionares",
+        "en": "Surface processes – alluvial deposits"
+      },
+      "Processos Superficiais - Enriquecimento Supergénico": {
+        "ru": "Поверхностные процессы – супергенное обогащение",
+        "pt": "Processos Superficiais - Enriquecimento Supergénico",
+        "en": "Surface processes – supergene enrichment"
+      },
+      "Metamórfica/Hidrotermal - Associada a Corredores de Deformação": {
+        "ru": "Метаморфический/гидротермальный – связанный с зонами деформации",
+        "pt": "Metamórfica/Hidrotermal - Associada a Corredores de Deformação",
+        "en": "Metamorphic/hydrothermal – associated with shear zones"
+      },
+      "Hidrotermal - Sulfuretos Maciços Vulcanogénicos": {
+        "ru": "Гидротермальный – массивные вулканогенные сульфидные руды",
+        "pt": "Hidrotermal - Sulfuretos Maciços Vulcanogénicos",
+        "en": "Hydrothermal – volcanogenic massive sulphides"
+      },
+      "Magmática/Hidrotermal - Hidrotermal Ba": {
+        "ru": "Магматический/гидротермальный – гидротермальный барит (Ba)",
+        "pt": "Magmática/Hidrotermal - Hidrotermal Ba",
+        "en": "Magmatic/hydrothermal – hydrothermal barite (Ba)"
+      },
+      "Magmática/Hidrotermal - Skarns": {
+        "ru": "Магматический/гидротермальный – скарны",
+        "pt": "Magmática/Hidrotermal - Skarns",
+        "en": "Magmatic/hydrothermal – skarns"
+      },
+      "Processos Superficiais - Precipitados Químicos": {
+        "ru": "Поверхностные процессы – химические осадки",
+        "pt": "Processos Superficiais - Precipitados Químicos",
+        "en": "Surface processes – chemical precipitates"
+      },
+      "Magmática - Ortomagmática": {
+        "ru": "Магматический – ортомагматический",
+        "pt": "Magmática - Ortomagmática",
+        "en": "Magmatic – orthomagmatic"
+      },
+      "Metamórfica/Hidrotermal - Metamorfismo": {
+        "ru": "Метаморфический/гидротермальный – метаморфизм",
+        "pt": "Metamórfica/Hidrotermal - Metamorfismo",
+        "en": "Metamorphic/hydrothermal – metamorphism"
+      },
+      "Magmática/Hidrotermal, Epigenética": {
+        "ru": "Магматический/гидротермальный, эпигенетический",
+        "pt": "Magmática/Hidrotermal, Epigenética",
+        "en": "Magmatic/hydrothermal, epigenetic"
+      },
+      "Metamórfica/Hidrotermal - Greissen": {
+        "ru": "Метаморфический/гидротермальный – грейзен",
+        "pt": "Metamórfica/Hidrotermal - Greissen",
+        "en": "Metamorphic/hydrothermal – greisen"
+      },
+      "Processos Superficiais - Detrítica": {
+        "ru": "Поверхностные процессы – обломочные россыпи",
+        "pt": "Processos Superficiais - Detrítica",
+        "en": "Surface processes – detrital"
+      },
+      "Processos Superficiais - Depósito aluvionar/eluvionar": {
+        "ru": "Поверхностные процессы – аллювиальные/элювиальные россыпи",
+        "pt": "Processos Superficiais - Depósito aluvionar/eluvionar",
+        "en": "Surface processes – alluvial/eluvial deposit"
+      },
+      "Processos Superficiais - Meteorização": {
+        "ru": "Поверхностные процессы – выветривание",
+        "pt": "Processos Superficiais - Meteorização",
+        "en": "Surface processes – weathering"
+      },
+      "Metamórfica/Hidrotermal - Processos Metassomáticos": {
+        "ru": "Метаморфический/гидротермальный – метасоматические процессы",
+        "pt": "Metamórfica/Hidrotermal - Processos Metassomáticos",
+        "en": "Metamorphic/hydrothermal – metasomatic processes"
+      }
+    },
+    "substance": {
+      "W": {
+        "ru": "Вольфрам (W)",
+        "pt": "Tungsténio (W)",
+        "en": "Tungsten (W)"
+      },
+      "Mn": {
+        "ru": "Марганец (Mn)",
+        "pt": "Manganês (Mn)",
+        "en": "Manganese (Mn)"
+      },
+      "Feldspato": {
+        "ru": "Полевой шпат",
+        "pt": "Feldspato",
+        "en": "Feldspar"
+      },
+      "Cu": {
+        "ru": "Медь (Cu)",
+        "pt": "Cobre (Cu)",
+        "en": "Copper (Cu)"
+      },
+      "Ti": {
+        "ru": "Титан (Ti)",
+        "pt": "Titânio (Ti)",
+        "en": "Titanium (Ti)"
+      },
+      "Sb": {
+        "ru": "Сурьма (Sb)",
+        "pt": "Antimónio (Sb)",
+        "en": "Antimony (Sb)"
+      },
+      "Ba": {
+        "ru": "Барий (Ba), барит",
+        "pt": "Bário (Ba), baritina",
+        "en": "Barium (Ba), barite"
+      },
+      "Nb/Ta": {
+        "ru": "Ниобий/тантал (Nb/Ta)",
+        "pt": "Nióbio/Tântalo (Nb/Ta)",
+        "en": "Niobium/tantalum (Nb/Ta)"
+      },
+      "Fosfato": {
+        "ru": "Фосфат",
+        "pt": "Fosfato",
+        "en": "Phosphate"
+      },
+      "Li": {
+        "ru": "Литий (Li)",
+        "pt": "Lítio (Li)",
+        "en": "Lithium (Li)"
+      },
+      "As": {
+        "ru": "Мышьяк (As)",
+        "pt": "Arsénio (As)",
+        "en": "Arsenic (As)"
+      },
+      "REE": {
+        "ru": "Редкоземельные элементы (REE)",
+        "pt": "Elementos de terras raras (REE)",
+        "en": "Rare-earth elements (REE)"
+      },
+      "Feldspato + Be": {
+        "ru": "Полевой шпат + бериллий (Be)",
+        "pt": "Feldspato + Berílio (Be)",
+        "en": "Feldspar + beryllium (Be)"
+      },
+      "Be": {
+        "ru": "Бериллий (Be)",
+        "pt": "Berílio (Be)",
+        "en": "Beryllium (Be)"
+      },
+      "Grafite": {
+        "ru": "Графит",
+        "pt": "Grafite",
+        "en": "Graphite"
+      },
+      "Ni": {
+        "ru": "Никель (Ni)",
+        "pt": "Níquel (Ni)",
+        "en": "Nickel (Ni)"
+      },
+      "Co": {
+        "ru": "Кобальт (Co)",
+        "pt": "Cobalto (Co)",
+        "en": "Cobalt (Co)"
+      },
+      "V": {
+        "ru": "Ванадий (V)",
+        "pt": "Vanádio (V)",
+        "en": "Vanadium (V)"
+      },
+      "Bi": {
+        "ru": "Висмут (Bi)",
+        "pt": "Bismuto (Bi)",
+        "en": "Bismuth (Bi)"
+      },
+      "Ge": {
+        "ru": "Германий (Ge)",
+        "pt": "Germânio (Ge)",
+        "en": "Germanium (Ge)"
+      },
+      "An": {
+        "ru": "An (неизвестно)",
+        "pt": "An (desconhecido)",
+        "en": "An (unknown)"
+      }
+    },
+    "resource": {
+      "limestone": {
+        "ru": "Известняк",
+        "pt": "Calcário",
+        "en": "Limestone"
+      },
+      "iron_ore": {
+        "ru": "Железная руда",
+        "pt": "Minério de ferro",
+        "en": "Iron ore"
+      },
+      "water": {
+        "ru": "Вода",
+        "pt": "Água",
+        "en": "Water"
+      },
+      "etain": {
+        "ru": "Олово",
+        "pt": "Estanho",
+        "en": "Tin"
+      },
+      "copper": {
+        "ru": "Медь",
+        "pt": "Cobre",
+        "en": "Copper"
+      },
+      "copper;silver;gold": {
+        "ru": "Медь, серебро, золото",
+        "pt": "Cobre, prata, ouro",
+        "en": "Copper, silver, gold"
+      },
+      "coal": {
+        "ru": "Уголь",
+        "pt": "Carvão",
+        "en": "Coal"
+      },
+      "gold": {
+        "ru": "Золото",
+        "pt": "Ouro",
+        "en": "Gold"
+      },
+      "water;limestone": {
+        "ru": "Вода, известняк",
+        "pt": "Água, calcário",
+        "en": "Water, limestone"
+      },
+      "cuprite": {
+        "ru": "Куприт",
+        "pt": "Cuprite",
+        "en": "Cuprite"
+      },
+      "gold;antimony": {
+        "ru": "Золото, сурьма",
+        "pt": "Ouro, antimónio",
+        "en": "Gold, antimony"
+      },
+      "lead;tin": {
+        "ru": "Свинец, олово",
+        "pt": "Chumbo, estanho",
+        "en": "Lead, tin"
+      },
+      "pyrite": {
+        "ru": "Пирит",
+        "pt": "Pirite",
+        "en": "Pyrite"
+      },
+      "tungsten": {
+        "ru": "Вольфрам",
+        "pt": "Tungsténio",
+        "en": "Tungsten"
+      },
+      "água": {
+        "ru": "Вода",
+        "pt": "Água",
+        "en": "Water"
+      },
+      "coper;iron;gold;silver": {
+        "ru": "Медь, железо, золото, серебро",
+        "pt": "Cobre, ferro, ouro, prata",
+        "en": "Copper, iron, gold, silver"
+      }
+    },
+    "access": {
+      "no": {
+        "ru": "Нет доступа",
+        "pt": "Sem acesso",
+        "en": "No access"
+      },
+      "yes": {
+        "ru": "Доступ открыт",
+        "pt": "Acesso livre",
+        "en": "Public access"
+      },
+      "customers": {
+        "ru": "Только для клиентов",
+        "pt": "Apenas clientes",
+        "en": "Customers only"
+      },
+      "permissive": {
+        "ru": "Допускается (с разрешения владельца)",
+        "pt": "Permitido (revogável)",
+        "en": "Permissive (revocable)"
+      },
+      "private": {
+        "ru": "Частный доступ",
+        "pt": "Privado",
+        "en": "Private"
+      },
+      "permit": {
+        "ru": "По пропуску",
+        "pt": "Mediante autorização",
+        "en": "Permit required"
+      }
+    }
+  };
+
+  function tv(section, raw) {
+    const t = MIN_VALUE_I18N[section] && MIN_VALUE_I18N[section][raw];
+    return t ? t[state.lang] || t.pt : raw;
+  }
+
+  const MIN_LIST_LIMIT = 300;
+  let geoLayerGroup = null;
+  let geoRenderer = null;
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // "Cu, Zn; Pb" → ['Cu', 'Zn', 'Pb']
+  function splitSubstances(m) {
+    return (m.substances || m.main || '')
+      .split(/\s*,\s*/)
+      .map(x => x.trim())
+      .filter(Boolean);
+  }
+
+  // English element / mineral word used to match OSM resource tags, e.g. 'Cu' → 'copper'
+  function substanceKeyword(sub) {
+    const t = MIN_VALUE_I18N.substance[sub];
+    return t ? t.en.replace(/\s*\(.*\)\s*/g, '').split(/[,/+]/)[0].trim().toLowerCase() : sub.toLowerCase();
+  }
+
+  function geoKindOf(item) {
+    return item.kind || 'minerals';
+  }
+
+  function getFilteredGeo() {
+    const f = state.minerals;
+    const q = f.query.trim().toLowerCase();
+    const matchesQuery = item => !q || [item.name, item.substances, item.main && tv('substance', item.main), item.municipality, item.district, item.resource, item.resource && tv('resource', item.resource)]
+      .some(v => v && v.toLowerCase().indexOf(q) !== -1);
+
+    const minerals = !f.layers.minerals ? [] : GEO.minerals.filter(m => {
+      if (f.group !== 'all' && m.group !== f.group) return false;
+      if (f.substance !== 'all' && splitSubstances(m).indexOf(f.substance) === -1) return false;
+      return matchesQuery(m);
+    });
+    const subWord = f.substance === 'all' ? null : substanceKeyword(f.substance);
+    const sites = GEO.sites.filter(s => {
+      if (!f.layers[s.kind] || !matchesQuery(s)) return false;
+      if (!subWord) return true;
+      return !!s.resource && tv('resource', s.resource) !== s.resource
+        ? MIN_VALUE_I18N.resource[s.resource].en.toLowerCase().indexOf(subWord) !== -1
+        : false;
+    });
+    return minerals.concat(sites);
+  }
+
+  function sortGeo(items) {
+    const lang = state.lang;
+    if (state.minerals.sort === 'north') return items.slice().sort((a, b) => b.lat - a.lat);
+    const key = {
+      name: it => it.name || '￿',
+      substance: it => (it.main ? tv('substance', it.main) : it.resource ? tv('resource', it.resource) : '￿'),
+      group: it => (it.group ? MINERAL_GROUPS[it.group][lang] : '￿'),
+      type: it => GEO_LAYERS[geoKindOf(it)][lang]
+    }[state.minerals.sort] || (it => it.name);
+    return items.slice().sort((a, b) => key(a).localeCompare(key(b), lang) || (a.name || '').localeCompare(b.name || '', lang));
+  }
+
+  function substanceColor(sub) {
+    return SUBSTANCE_COLORS[sub] || SUBSTANCE_OTHER_COLOR;
+  }
+
+  function geoColor(item) {
+    return item.kind ? GEO_LAYERS[item.kind].color : substanceColor(item.main);
+  }
+
+  function geoPopupHtml(item) {
+    const s = MIN_STRINGS[state.lang];
+    const kind = geoKindOf(item);
+    const name = item.name || s.unnamed;
+    const row = (label, val) => (val ? `<div class="geo-pop-row"><span>${label}</span><strong>${escapeHtml(val)}</strong></div>` : '');
+    const typeLabel = item.group ? MINERAL_GROUPS[item.group][state.lang] : GEO_LAYERS[kind][state.lang];
+    const typeColor = item.group ? MINERAL_GROUPS[item.group].color : GEO_LAYERS[kind].color;
+    const links = [];
+    if (item.link && /^https?:\/\//.test(item.link)) {
+      links.push(`<a href="${escapeHtml(item.link)}" target="_blank" rel="noopener">${s.lnegSheet} ↗</a>`);
+    }
+    if (item.osm) {
+      links.push(`<a href="https://www.openstreetmap.org/${escapeHtml(item.osm)}" target="_blank" rel="noopener">${s.osm} ↗</a>`);
+    }
+    if (item.name && kind !== 'cave') {
+      links.push(`<a href="https://www.mindat.org/search.php?search=${encodeURIComponent(item.name)}" target="_blank" rel="noopener">${s.mindat} ↗</a>`);
+    }
+    return `
+      <div class="geo-popup">
+        <div class="geo-pop-type" style="color:${typeColor}">${GEO_LAYERS[kind].icon} ${escapeHtml(typeLabel)}</div>
+        <div class="geo-pop-name">${escapeHtml(name)}</div>
+        ${row(s.main, item.main && tv('substance', item.main))}
+        ${item.substances && item.substances !== item.main ? row(s.all, splitSubstances(item).map(x => tv('substance', x)).join(', ')) : ''}
+        ${row(s.size, item.size && tv('size', item.size))}
+        ${row(s.genesis, item.genesis && tv('genesis', item.genesis))}
+        ${row(s.resource, item.resource && tv('resource', item.resource))}
+        ${row(s.access, item.access && tv('access', item.access))}
+        ${row(s.place, [item.municipality, item.district].filter(Boolean).join(', '))}
+        <div class="geo-pop-coords">${item.lat.toFixed(4)}° N, ${Math.abs(item.lng).toFixed(4)}° W</div>
+        ${kind !== 'minerals' ? `<div class="geo-pop-warning">⚠️ ${s.safety}</div>` : ''}
+        ${links.length ? `<div class="geo-pop-links">${links.join('')}</div>` : ''}
+      </div>`;
+  }
+
+  const geoMarkerById = new Map();
+
+  function renderGeoLayer() {
+    if (!map) return;
+    if (!geoLayerGroup) {
+      geoRenderer = L.canvas({ padding: 0.3 });
+      geoLayerGroup = L.layerGroup();
+    }
+    geoLayerGroup.clearLayers();
+    geoMarkerById.clear();
+
+    getFilteredGeo().forEach(item => {
+      const isSite = !!item.kind;
+      const marker = L.circleMarker([item.lat, item.lng], {
+        renderer: geoRenderer,
+        radius: isSite ? 6 : 4.5,
+        color: isSite ? '#0b1410' : 'rgba(0,0,0,0.55)',
+        weight: isSite ? 2 : 1,
+        fillColor: geoColor(item),
+        fillOpacity: 0.9
+      });
+      marker.bindPopup(() => geoPopupHtml(item), { maxWidth: 300, className: 'geo-leaflet-popup' });
+      marker.addTo(geoLayerGroup);
+      geoMarkerById.set(item, marker);
+    });
+  }
+
+  function renderMineralsPanel() {
+    const s = MIN_STRINGS[state.lang];
+    const f = state.minerals;
+
+    const counts = { minerals: GEO.minerals.length, cave: 0, mine: 0, mine_abandoned: 0 };
+    GEO.sites.forEach(x => { counts[x.kind] = (counts[x.kind] || 0) + 1; });
+
+    const layersEl = document.getElementById('min-layer-toggles');
+    if (layersEl) {
+      layersEl.innerHTML = Object.keys(GEO_LAYERS).map(k => `
+        <button class="forest-filter-btn min-layer-btn ${f.layers[k] ? 'active' : ''}" data-geo-layer="${k}" aria-pressed="${f.layers[k]}">
+          <span class="color-dot" style="background:${GEO_LAYERS[k].color}"></span>
+          <span class="pill-name">${GEO_LAYERS[k].icon} ${GEO_LAYERS[k][state.lang]}</span>
+          <span class="count-badge">${counts[k] || 0}</span>
+        </button>`).join('');
+    }
+
+    const groupCounts = {};
+    GEO.minerals.forEach(m => { groupCounts[m.group] = (groupCounts[m.group] || 0) + 1; });
+    const groupsEl = document.getElementById('min-group-filters');
+    if (groupsEl) {
+      groupsEl.innerHTML = [`
+        <button class="forest-filter-btn min-group-btn ${f.group === 'all' ? 'active' : ''}" data-geo-group="all">
+          <span class="pill-name">${s.allGroups}</span><span class="count-badge">${GEO.minerals.length}</span>
+        </button>`].concat(Object.keys(MINERAL_GROUPS).filter(g => groupCounts[g]).map(g => `
+        <button class="forest-filter-btn min-group-btn ${f.group === g ? 'active' : ''}" data-geo-group="${g}">
+          <span class="color-dot" style="background:${MINERAL_GROUPS[g].color}"></span>
+          <span class="pill-name">${MINERAL_GROUPS[g][state.lang]}</span>
+          <span class="count-badge">${groupCounts[g]}</span>
+        </button>`)).join('');
+    }
+
+    const subsEl = document.getElementById('min-substance-filters');
+    if (subsEl) {
+      // Substances present in the chosen EU class, most common first
+      const inClass = GEO.minerals.filter(m => f.group === 'all' || m.group === f.group);
+      const c = {};
+      inClass.forEach(m => new Set(splitSubstances(m)).forEach(x => { c[x] = (c[x] || 0) + 1; }));
+      const subs = Object.keys(c).sort((x, y) => c[y] - c[x] || x.localeCompare(y));
+      if (f.substance !== 'all' && !c[f.substance]) f.substance = 'all';
+      subsEl.innerHTML = [`
+        <button class="forest-filter-btn min-sub-btn ${f.substance === 'all' ? 'active' : ''}" data-geo-substance="all">
+          <span class="pill-name">${s.allSubstances}</span><span class="count-badge">${inClass.length}</span>
+        </button>`].concat(subs.map(x => `
+        <button class="forest-filter-btn min-sub-btn ${f.substance === x ? 'active' : ''}" data-geo-substance="${escapeHtml(x)}">
+          <span class="color-dot" style="background:${substanceColor(x)}"></span>
+          <span class="pill-name">${escapeHtml(tv('substance', x))}</span>
+          <span class="count-badge">${c[x]}</span>
+        </button>`)).join('');
+    }
+
+    const sortSel = document.getElementById('select-min-sort');
+    if (sortSel) {
+      sortSel.innerHTML = [['name', s.sortName], ['substance', s.sortSubstance], ['group', s.sortGroup], ['north', s.sortNorth], ['type', s.sortType]]
+        .map(([v, l]) => `<option value="${v}" ${v === f.sort ? 'selected' : ''}>${l}</option>`).join('');
+    }
+
+    const searchEl = document.getElementById('input-min-search');
+    if (searchEl) searchEl.placeholder = s.search;
+
+    [['txt-min-layers-title', s.layers], ['txt-min-groups-title', s.groups], ['txt-min-class-title', s.classTitle], ['label-min-sort', s.sort], ['txt-min-results', s.results]]
+      .forEach(([id, txt]) => { const el = document.getElementById(id); if (el) el.textContent = txt; });
+    const noteEl = document.getElementById('txt-min-source-note');
+    if (noteEl) noteEl.textContent = `${s.appliesNote} ${s.source(GEO.mineralsFetchedAt || '—', GEO.sitesFetchedAt || '—')}`;
+
+    renderMineralsList();
+  }
+
+  function renderMineralsList() {
+    const s = MIN_STRINGS[state.lang];
+    const listEl = document.getElementById('list-minerals');
+    const countEl = document.getElementById('count-min-results');
+    const items = sortGeo(getFilteredGeo());
+    if (countEl) countEl.textContent = items.length;
+    if (!listEl) return;
+
+    if (items.length === 0) {
+      listEl.innerHTML = `<div class="list-placeholder"><p>${s.none}</p></div>`;
+      return;
+    }
+    const shown = items.slice(0, MIN_LIST_LIMIT);
+    listEl.innerHTML = shown.map((it, i) => {
+      const kind = geoKindOf(it);
+      const sub = it.main ? tv('substance', it.main) : it.resource ? tv('resource', it.resource) : GEO_LAYERS[kind][state.lang];
+      const place = [it.municipality, it.district].filter(Boolean).join(', ');
+      return `
+        <button class="geo-list-item" data-geo-index="${i}">
+          <span class="geo-list-dot" style="background:${geoColor(it)}"></span>
+          <span class="geo-list-body">
+            <span class="geo-list-name">${GEO_LAYERS[kind].icon} ${escapeHtml(it.name || s.unnamed)}</span>
+            <span class="geo-list-meta">${escapeHtml(sub)}${place ? ' · ' + escapeHtml(place) : ''}</span>
+          </span>
+        </button>`;
+    }).join('') + (items.length > MIN_LIST_LIMIT ? `<p class="min-list-more">${s.showing(MIN_LIST_LIMIT, items.length)}</p>` : '');
+    listEl._geoItems = shown;
+  }
+
+  function updateMineralsExplainer() {
+    const s = MIN_STRINGS[state.lang];
+    const banner = document.getElementById('active-layer-explainer');
+    const items = getFilteredGeo();
+    const c = { minerals: 0, cave: 0, mine: 0, mine_abandoned: 0 };
+    items.forEach(it => { c[geoKindOf(it)]++; });
+    banner.classList.toggle('warning-mode', items.length === 0);
+    document.getElementById('explainer-icon').textContent = '💎';
+    document.getElementById('explainer-title').textContent = s.explTitle(items.length);
+    document.getElementById('explainer-badge').textContent = 'LNEG CRM2023 · OSM';
+    document.getElementById('explainer-desc').textContent =
+      s.explDesc(c.minerals, c.cave, c.mine, c.mine_abandoned, GEO.mineralsFetchedAt || '—', GEO.sitesFetchedAt || '—');
+    const resetBtn = document.getElementById('btn-reset-filters');
+    if (resetBtn) resetBtn.classList.add('hidden');
+  }
+
+  function refreshMinerals() {
+    renderGeoLayer();
+    renderMineralsList();
+    updateMineralsExplainer();
+  }
+
+  function setMapMode(mode) {
+    if (!map || (mode !== 'forests' && mode !== 'minerals')) return;
+    state.mapMode = mode;
+    const isMin = mode === 'minerals';
+    document.body.classList.toggle('map-mode-minerals', isMin);
+    document.querySelectorAll('.map-mode-btn').forEach(btn => {
+      const on = btn.getAttribute('data-map-mode') === mode;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    const panel = document.getElementById('minerals-panel');
+    if (panel) panel.classList.toggle('hidden', !isMin);
+
+    const forestLayers = [wmsLayer, locationsLayerGroup, inatLayerGroup, highlightParcelLayer].filter(Boolean);
+    if (isMin) {
+      forestLayers.forEach(l => map.removeLayer(l));
+      const inspector = document.getElementById('parcel-inspector');
+      if (inspector) inspector.classList.add('hidden');
+      renderMineralsPanel();
+      renderGeoLayer();
+      geoLayerGroup.addTo(map);
+      updateMineralsExplainer();
+    } else {
+      if (geoLayerGroup) map.removeLayer(geoLayerGroup);
+      forestLayers.forEach(l => l.addTo(map));
+      updateWmsLayer();
+      updateActiveLayerExplainer();
+    }
+    measureSheetPeek();
+  }
+
+  function bindMineralsEvents() {
+    document.querySelectorAll('.map-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => setMapMode(btn.getAttribute('data-map-mode')));
+    });
+
+    const panel = document.getElementById('minerals-panel');
+    if (!panel) return;
+
+    panel.addEventListener('click', e => {
+      const layerBtn = e.target.closest('[data-geo-layer]');
+      const groupBtn = e.target.closest('[data-geo-group]');
+      const subBtn = e.target.closest('[data-geo-substance]');
+      const listBtn = e.target.closest('[data-geo-index]');
+      if (layerBtn) {
+        const k = layerBtn.getAttribute('data-geo-layer');
+        state.minerals.layers[k] = !state.minerals.layers[k];
+        renderMineralsPanel();
+        refreshMinerals();
+      } else if (groupBtn) {
+        state.minerals.group = groupBtn.getAttribute('data-geo-group');
+        renderMineralsPanel();
+        refreshMinerals();
+        collapseSheetOnMobile();
+      } else if (subBtn) {
+        state.minerals.substance = subBtn.getAttribute('data-geo-substance');
+        renderMineralsPanel();
+        refreshMinerals();
+        collapseSheetOnMobile();
+      } else if (listBtn) {
+        const items = document.getElementById('list-minerals')._geoItems || [];
+        const item = items[Number(listBtn.getAttribute('data-geo-index'))];
+        const marker = item && geoMarkerById.get(item);
+        if (item) {
+          collapseSheetOnMobile();
+          map.setView([item.lat, item.lng], Math.max(map.getZoom(), 12), { animate: true });
+          if (marker) setTimeout(() => marker.openPopup(), 350);
+        }
+      }
+    });
+
+    const sortSel = document.getElementById('select-min-sort');
+    if (sortSel) {
+      sortSel.addEventListener('change', () => {
+        state.minerals.sort = sortSel.value;
+        renderMineralsList();
+      });
+    }
+    const search = document.getElementById('input-min-search');
+    if (search) {
+      let t = null;
+      search.addEventListener('input', () => {
+        clearTimeout(t);
+        t = setTimeout(() => {
+          state.minerals.query = search.value;
+          refreshMinerals();
+        }, 200);
+      });
+    }
+  }
+
+  function updateMineralsLanguage() {
+    const s = MIN_STRINGS[state.lang];
+    const f = document.getElementById('txt-map-forests');
+    const m = document.getElementById('txt-map-minerals');
+    if (f) f.textContent = s.forests;
+    if (m) m.textContent = s.minerals;
+    if (state.mapMode === 'minerals') {
+      renderMineralsPanel();
+      if (geoLayerGroup) geoLayerGroup.eachLayer(l => l.isPopupOpen() && l.closePopup());
+      updateMineralsExplainer();
+    }
+  }
+
+  // =========================================================================
+  // Mobile Bottom Sheet
+  // =========================================================================
+  const mobileQuery = window.matchMedia('(max-width: 768px)');
+  let sheetState = 'peek';
+
+  function isMobileLayout() {
+    return mobileQuery.matches;
+  }
+
+  function setSheetState(next) {
+    const sidebar = document.getElementById('sidebar');
+    const handle = document.getElementById('sheet-handle');
+    if (!sidebar) return;
+    sheetState = next;
+    sidebar.classList.toggle('sheet-half', next === 'half');
+    sidebar.classList.toggle('sheet-full', next === 'full');
+    if (handle) handle.setAttribute('aria-expanded', next === 'peek' ? 'false' : 'true');
+    if (next === 'peek') {
+      const scroller = sidebar.querySelector('.sidebar-scrollable');
+      if (scroller) scroller.scrollTop = 0;
+    }
+  }
+
+  function collapseSheetOnMobile() {
+    if (isMobileLayout() && sheetState !== 'peek') setSheetState('peek');
+  }
+
+  // Collapsed height = grab handle + date pickers, so month/decade stay one tap away
+  function measureSheetPeek() {
+    const sidebar = document.getElementById('sidebar');
+    const pickers = document.querySelector(state.mapMode === 'minerals' ? '#minerals-layers-card' : '#date-card .date-pickers-row');
+    if (!sidebar || !pickers || !isMobileLayout()) return;
+    const prev = sidebar.style.transform;
+    sidebar.style.transform = 'none';
+    const peek = Math.ceil(pickers.getBoundingClientRect().bottom - sidebar.getBoundingClientRect().top + 14);
+    sidebar.style.transform = prev;
+    if (peek > 60 && peek < 320) {
+      document.documentElement.style.setProperty('--sheet-peek', `${peek}px`);
+    }
+  }
+
+  function initMobileSheet() {
+    const sidebar = document.getElementById('sidebar');
+    const handle = document.getElementById('sheet-handle');
+    if (!sidebar || !handle) return;
+
+    measureSheetPeek();
+    window.addEventListener('resize', measureSheetPeek);
+    mobileQuery.addEventListener('change', () => {
+      setSheetState('peek');
+      measureSheetPeek();
+    });
+
+    // Drag the handle (or the collapsed date card) to resize; a short tap toggles
+    let startY = 0;
+    let startOffset = 0;
+    let dragging = false;
+    let moved = false;
+
+    const currentOffset = () => {
+      const m = new DOMMatrixReadOnly(getComputedStyle(sidebar).transform);
+      return m.m42;
+    };
+
+    const onDown = e => {
+      if (!isMobileLayout()) return;
+      // In the collapsed sheet only the handle and header area start a drag
+      if (e.currentTarget !== handle && (sheetState !== 'peek' || e.target.closest('select, button, input'))) return;
+      dragging = true;
+      moved = false;
+      startY = e.clientY;
+      startOffset = currentOffset();
+      sidebar.classList.add('sheet-dragging');
+      if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId);
+    };
+
+    const onMove = e => {
+      if (!dragging) return;
+      const dy = e.clientY - startY;
+      if (Math.abs(dy) > 6) moved = true;
+      const maxOffset = sidebar.offsetHeight;
+      const y = Math.min(Math.max(startOffset + dy, 0), maxOffset);
+      sidebar.style.transform = `translateY(${y}px)`;
+    };
+
+    const onUp = e => {
+      if (!dragging) return;
+      dragging = false;
+      sidebar.classList.remove('sheet-dragging');
+      const endOffset = currentOffset();
+      sidebar.style.transform = '';
+      if (!moved) {
+        if (e.currentTarget === handle) setSheetState(sheetState === 'peek' ? 'half' : 'peek');
+        return;
+      }
+      const h = sidebar.offsetHeight;
+      const velocity = e.clientY - startY;
+      // Snap to the nearest state, biased by drag direction
+      const ratio = endOffset / h;
+      let next;
+      if (velocity < -40) next = ratio < 0.3 ? 'full' : 'half';
+      else if (velocity > 40) next = ratio > 0.55 ? 'peek' : 'half';
+      else next = ratio < 0.22 ? 'full' : ratio < 0.7 ? 'half' : 'peek';
+      setSheetState(next);
+    };
+
+    [handle, sidebar.querySelector('.date-card .card-header-flex')].forEach(el => {
+      if (!el) return;
+      el.addEventListener('pointerdown', onDown);
+      el.addEventListener('pointermove', onMove);
+      el.addEventListener('pointerup', onUp);
+      el.addEventListener('pointercancel', onUp);
+    });
+
+    // Picking a filter on a phone should show its effect on the map right away
+    sidebar.addEventListener('click', e => {
+      if (e.target.closest('.forest-filter-btn, .pheno-filter-btn, .mode-tab, .active-species-pill, .species-pill-chip') && !e.target.closest('#minerals-panel')) {
+        setTimeout(collapseSheetOnMobile, 150);
+      }
+    });
+
+    handle.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setSheetState(sheetState === 'peek' ? 'half' : 'peek');
+      }
+    });
+  }
+
+  // =========================================================================
   // Event Listeners Binding
   // =========================================================================
   function bindEvents() {
-    // Mobile Drawer Toggle
+    // Mobile bottom sheet (the sidebar on narrow screens)
+    initMobileSheet();
     const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
-    const sidebar = document.getElementById('sidebar');
-    if (btnToggleSidebar && sidebar) {
+    if (btnToggleSidebar) {
       btnToggleSidebar.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
+        setSheetState(sheetState === 'peek' ? 'half' : 'peek');
+      });
+    }
+
+    // Mobile: explainer collapses to its title; tap to read the full explanation
+    const explainer = document.getElementById('active-layer-explainer');
+    if (explainer) {
+      explainer.addEventListener('click', e => {
+        if (e.target.closest('#btn-reset-filters')) return;
+        explainer.classList.toggle('expanded');
       });
     }
 
@@ -2314,6 +3304,8 @@
       btn.addEventListener('click', () => {
         const lang = btn.getAttribute('data-lang');
         updateLanguage(lang);
+        updateMineralsLanguage();
+        measureSheetPeek();
       });
     });
 
@@ -2636,6 +3628,7 @@
     if (btnFocusMap && modalDetail) {
       btnFocusMap.addEventListener('click', () => {
         modalDetail.classList.add('hidden');
+        collapseSheetOnMobile();
         if (state.selectedLocation && map) {
           map.setView([state.selectedLocation.lat, state.selectedLocation.lng], 12, { animate: true });
           const marker = locationMarkers[state.selectedLocation.id];
@@ -2691,7 +3684,10 @@
   function init() {
     initMap();
     bindEvents();
+    bindMineralsEvents();
     updateLanguage(state.lang);
+    updateMineralsLanguage();
+    measureSheetPeek();
   }
 
   if (document.readyState === 'loading') {

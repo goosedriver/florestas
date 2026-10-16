@@ -2,7 +2,8 @@
 <html lang="pt" data-theme="deep-forest">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#081c15">
   <title>Florestas de Portugal — Guia Fenológico, Distribuição & Rastreador de Outono</title>
   <meta name="description" content="Aplicação interativa trilingue sobre as florestas de Portugal, distribuição de espécies DGT COS 2025, floração e frutificação sazonal e rastreador de folhagem outonal.">
   
@@ -47,6 +48,18 @@
       </div>
     </div>
 
+    <!-- Forests / Minerals map mode switch -->
+    <div class="map-mode-switch" id="map-mode-switch" role="tablist" aria-label="Mapa">
+      <button class="map-mode-btn active" data-map-mode="forests" id="btn-map-forests" role="tab" aria-selected="true">
+        <span class="map-mode-emoji" aria-hidden="true">🌲</span>
+        <span class="map-mode-label" id="txt-map-forests">Florestas</span>
+      </button>
+      <button class="map-mode-btn" data-map-mode="minerals" id="btn-map-minerals" role="tab" aria-selected="false">
+        <span class="map-mode-emoji" aria-hidden="true">💎</span>
+        <span class="map-mode-label" id="txt-map-minerals">Minerais</span>
+      </button>
+    </div>
+
     <div class="header-actions">
       <!-- Data Authenticity Badge & Modal Trigger -->
       <div class="data-badge-container" id="data-badge">
@@ -71,7 +84,59 @@
     
     <!-- Left Control & Filter Sidebar -->
     <aside class="sidebar" id="sidebar">
+      <!-- Mobile bottom-sheet grab handle (hidden on desktop) -->
+      <div class="sheet-handle" id="sheet-handle" role="button" tabindex="0" aria-controls="sidebar" aria-expanded="false" aria-label="Filtros">
+        <span class="sheet-grip" aria-hidden="true"></span>
+      </div>
       <div class="sidebar-scrollable">
+
+        <!-- Minerals mode panel (hidden in forests mode) -->
+        <div class="minerals-panel hidden" id="minerals-panel">
+          <section class="card filter-card" id="minerals-layers-card">
+            <div class="section-title-row">
+              <span class="section-title" id="txt-min-layers-title">Camadas</span>
+              <span class="section-tag">LNEG · OSM</span>
+            </div>
+            <div class="pills-grid" id="min-layer-toggles" role="group"></div>
+          </section>
+
+          <section class="card filter-card" id="minerals-groups-card">
+            <div class="section-title-row">
+              <span class="section-title" id="txt-min-groups-title">Grupos de substâncias</span>
+              <span class="section-tag">LNEG CRM2023</span>
+            </div>
+            <div class="pills-grid" id="min-substance-filters" role="group"></div>
+            <div class="section-title-row min-subtitle-row">
+              <span class="section-title" id="txt-min-class-title">Classe UE</span>
+            </div>
+            <div class="pills-grid" id="min-group-filters" role="group"></div>
+          </section>
+
+          <section class="card filter-card" id="minerals-substance-card">
+            <div class="date-pickers-row min-sort-row">
+              <div class="field-control">
+                <label for="select-min-sort" class="field-label" id="label-min-sort">Ordenar</label>
+                <div class="select-wrapper">
+                  <select id="select-min-sort" class="custom-select"></select>
+                  <span class="select-arrow">▾</span>
+                </div>
+              </div>
+            </div>
+            <div class="search-input-wrap min-search-wrap">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="input-min-search" autocomplete="off">
+            </div>
+          </section>
+
+          <section class="sidebar-results">
+            <div class="min-results-header">
+              <span class="section-title" id="txt-min-results">Resultados</span>
+              <span class="count-badge" id="count-min-results">0</span>
+            </div>
+            <div class="results-list-container" id="list-minerals"></div>
+            <p class="min-source-note" id="txt-min-source-note"></p>
+          </section>
+        </div>
 
         <!-- Season / Date Time-Machine Card -->
         <section class="card date-card" id="date-card">
@@ -181,7 +246,7 @@
             </button>
             <button class="forest-filter-btn" data-type="orchard_shrub" id="btn-forest-orchard">
               <span class="color-dot" style="background:#f472b6"></span>
-              <span class="pill-name" id="txt-forest-orchard">Pomares de Amendoeira & Matos Fenológicos</span>
+              <span class="pill-name" id="txt-forest-orchard">Pomares (incl. amendoal) &amp; Alfarrobais</span>
             </button>
           </div>
         </section>
@@ -448,7 +513,7 @@
               <div class="legend-item"><span class="marker-swatch color-pine"></span><span id="leg-pine">Pinhais & Resinosas</span></div>
               <div class="legend-item"><span class="marker-swatch color-deciduous"></span><span id="leg-deciduous">Folhosas Caducifólias (Carvalho/Castanheiro)</span></div>
               <div class="legend-item"><span class="marker-swatch color-montado"></span><span id="leg-montado">Montado (Sobreiro/Azinheira)</span></div>
-              <div class="legend-item"><span class="marker-swatch color-orchard"></span><span id="leg-orchard">Amendoeiras & Arbustos</span></div>
+              <div class="legend-item"><span class="marker-swatch color-orchard"></span><span id="leg-orchard">Pomares &amp; Alfarrobais</span></div>
             </div>
           </div>
 
@@ -704,6 +769,7 @@
   
   <!-- Florestas Data & Application Scripts -->
   <script src="data.js"></script>
+  <script src="geo-data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
